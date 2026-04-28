@@ -1,0 +1,299 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { Star, Home as HomeIcon, Heart, Users, Bed, Bath, Building2, Landmark, Tent, MapPin, Maximize2 } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import PriceRangeSlider from '../components/ui/PriceRangeSlider';
+import CustomDropdown from '../components/ui/CustomDropdown';
+import PropertyCard from '../components/PropertyCard';
+
+// Inline Icons
+const IconLocation = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+const IconArrowUpRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>;
+const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
+const IconFilters = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>;
+
+const Properties = () => {
+  const navigate = useNavigate();
+  const [filters, setFilters] = useState({
+    status: 'All',
+    category: 'All',
+    minPrice: '',
+    maxPrice: '',
+    minArea: '',
+    maxArea: '',
+    bedrooms: 'Any',
+    bathrooms: 'Any',
+    parkingSpaces: 'Any',
+    minROI: '',
+    verifiedOnly: false
+  });
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const numberOptions = [
+    { label: 'Any', value: 'Any' },
+    ...Array.from({ length: 30 }, (_, i) => ({ label: `${i + 1}+`, value: `${i + 1}+` }))
+  ];
+
+  React.useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/properties');
+        const data = await response.json();
+        setProperties(data);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  const filteredProperties = properties.filter(p => {
+    // 1. Status Filter
+    if (filters.status !== 'All') {
+      if (filters.status === 'For Sale' && p.status !== 'FOR_SALE') return false;
+      if (filters.status === 'For Rent' && p.status !== 'FOR_RENT') return false;
+      if (filters.status === 'Sold' && p.status !== 'SOLD') return false;
+    }
+    
+    // 2. Category Filter
+    if (filters.category !== 'All' && p.category !== filters.category.toUpperCase()) {
+      return false;
+    }
+    
+    // 3. Price Filter
+    const propertyPrice = Number(p.price) || 0;
+    if (filters.minPrice !== '' && propertyPrice < Number(filters.minPrice)) return false;
+    if (filters.maxPrice !== '' && propertyPrice > Number(filters.maxPrice)) return false;
+
+    // 4. Area Filter
+    const propertyArea = Number(p.totalArea) || 0;
+    if (filters.minArea !== '' && propertyArea < Number(filters.minArea)) return false;
+    if (filters.maxArea !== '' && propertyArea > Number(filters.maxArea)) return false;
+    
+    // 5. Bedrooms Filter
+    if (filters.bedrooms !== 'Any') {
+      const bedsRequired = parseInt(filters.bedrooms);
+      const propertyBeds = p.bedrooms || 0;
+      if (propertyBeds < bedsRequired) return false;
+    }
+
+    // 6. Bathrooms Filter
+    if (filters.bathrooms !== 'Any') {
+      const bathsRequired = parseInt(filters.bathrooms);
+      const propertyBaths = p.bathrooms || 0;
+      if (propertyBaths < bathsRequired) return false;
+    }
+
+    // 7. Parking Spaces Filter
+    if (filters.parkingSpaces !== 'Any') {
+      const parkingRequired = parseInt(filters.parkingSpaces);
+      const propertyParking = p.parkingSpaces || 0;
+      if (propertyParking < parkingRequired) return false;
+    }
+
+    // 8. Minimum ROI Filter
+    if (filters.minROI !== '') {
+      const minROI = Number(filters.minROI);
+      const propertyROI = p.estimatedROI || 0;
+      if (propertyROI < minROI) return false;
+    }
+
+    // 9. Verified Only Filter
+    if (filters.verifiedOnly && !p.isVerified) return false;
+    
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA] font-poppins flex flex-col">
+      <Navbar />
+      
+      <div className="flex flex-col lg:flex-row flex-1 pt-20">
+        
+        {/* Sidebar */}
+        <aside className="w-full lg:w-[260px] bg-white border-r border-gray-200 lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 overflow-y-auto p-4 flex flex-col gap-3 shrink-0 custom-scrollbar">
+              
+          {/* Status Filter */}
+              <div>
+                <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Listing Status</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {['All', 'For Sale', 'For Rent', 'Sold'].map(status => (
+                    <button
+                      key={status}
+                      onClick={() => setFilters({ ...filters, status })}
+                      className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+                        filters.status === status
+                        ? 'bg-brand text-white'
+                        : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Property Type</h3>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { id: 'All', icon: <HomeIcon size={14} /> },
+                    { id: 'Residential', icon: <HomeIcon size={14} /> },
+                    { id: 'Commercial', icon: <Building2 size={14} /> },
+                    { id: 'Luxury', icon: <Landmark size={14} /> },
+                    { id: 'Vacation', icon: <Tent size={14} /> }
+                  ].map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setFilters({ ...filters, category: cat.id })}
+                      className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${
+                        filters.category === cat.id 
+                        ? 'border-brand bg-brand/5 text-brand' 
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-brand/30 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="mb-0.5">{cat.icon}</div>
+                      <span className="text-[10px] font-semibold">{cat.id}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <div className="bg-gray-50 rounded-2xl overflow-hidden">
+                  <PriceRangeSlider 
+                    min={0} 
+                    max={10000000} 
+                    label="Price Range" 
+                    onChange={(min, max) => setFilters({ ...filters, minPrice: min.toString(), maxPrice: max.toString() })} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 relative">
+                {/* Bedrooms Filter */}
+                <div className="relative">
+                  <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Bedrooms</h3>
+                  <div className="border border-gray-200 rounded-full bg-gray-50 transition-all hover:border-brand/30 hover:bg-white relative">
+                    <CustomDropdown
+                      options={numberOptions}
+                      value={filters.bedrooms}
+                      onChange={(val) => setFilters({ ...filters, bedrooms: val })}
+                      label=""
+                    />
+                  </div>
+                </div>
+
+                {/* Bathrooms Filter */}
+                <div className="relative">
+                  <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Bathrooms</h3>
+                  <div className="border border-gray-200 rounded-full bg-gray-50 transition-all hover:border-brand/30 hover:bg-white relative">
+                    <CustomDropdown
+                      options={numberOptions}
+                      value={filters.bathrooms}
+                      onChange={(val) => setFilters({ ...filters, bathrooms: val })}
+                      label=""
+                    />
+                  </div>
+                </div>
+
+                {/* Parking Filter */}
+                <div className="relative">
+                  <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Parking Spaces</h3>
+                  <div className="border border-gray-200 rounded-full bg-gray-50 transition-all hover:border-brand/30 hover:bg-white relative">
+                    <CustomDropdown
+                      options={numberOptions}
+                      value={filters.parkingSpaces}
+                      onChange={(val) => setFilters({ ...filters, parkingSpaces: val })}
+                      label=""
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Investment ROI Filter */}
+              <div>
+                <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Minimum ROI (%)</h3>
+                <div className="relative w-full">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]">%</span>
+                  <input 
+                    type="number"
+                    placeholder="e.g. 5"
+                    value={filters.minROI}
+                    onChange={(e) => setFilters({ ...filters, minROI: e.target.value })}
+                    className="w-full h-8 pl-4 pr-7 bg-gray-50 border border-gray-200 rounded-full text-[12px] font-medium focus:outline-none focus:border-brand focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Verified Filter */}
+              <div className="pt-3 border-t border-gray-100">
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <div>
+                    <h3 className="text-[12px] font-bold text-[#1A1A1A]">Verified</h3>
+                    <p className="text-[10px] text-gray-400 leading-tight">Verified listings only</p>
+                  </div>
+                  <div className={`w-8 h-5 rounded-full p-0.5 transition-colors duration-300 ${filters.verifiedOnly ? 'bg-brand' : 'bg-gray-200'}`}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-sm ${filters.verifiedOnly ? 'translate-x-3' : 'translate-x-0'}`} />
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    className="hidden" 
+                    checked={filters.verifiedOnly}
+                    onChange={(e) => setFilters({ ...filters, verifiedOnly: e.target.checked })}
+                  />
+                </label>
+              </div>
+
+        </aside>
+          
+        {/* Main Content (Grid) */}
+        <main className="flex-1 p-4 lg:p-8 w-full">
+          
+          {/* Grid */}
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mb-4"></div>
+                <p className="text-[14px] font-medium tracking-wide">Loading Elite Properties...</p>
+              </div>
+            ) : filteredProperties.length === 0 ? (
+              <div className="text-center py-24 text-gray-400">
+                <p className="text-[14px] font-medium tracking-wide">No properties found matching your filters.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-12">
+            {filteredProperties.map((property, index) => (
+              <PropertyCard key={property.id} property={property} index={index} />
+            ))}
+          </div>
+        )}
+
+        {/* Footer / Pagination */}
+        <div className="flex items-center justify-between pb-12 mt-8 border-t border-gray-100 pt-8">
+          <p className="text-[14px] text-gray-400 font-medium">Showing 1 - {filteredProperties.length} properties</p>
+          
+          <div className="flex items-center gap-2">
+            <button className="w-10 h-10 rounded-xl border border-gray-100 bg-white flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-all rotate-180">
+              <IconChevronDown />
+            </button>
+            <button className="w-10 h-10 rounded-xl bg-brand text-white text-[14px] font-bold">1</button>
+            <button className="w-10 h-10 rounded-xl border border-gray-100 bg-white flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-all">
+              <IconChevronDown />
+            </button>
+          </div>
+        </div>
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default Properties;

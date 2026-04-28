@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500;1,600&display=swap');
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@theme {
+  --color-brand: #FF4D00;
+  --color-brand-dark: #730000;
+  --color-primary: var(--color-brand);
+  --color-primary-hover: #E64500;
+  --color-bg-light: #F5F5F0;
+  --color-text-dark: #1A1A1A;
+  
+  --font-poppins: "Poppins", sans-serif;
+  
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #1A1A1A;
+  }
+
+  body {
+    @apply bg-white text-text-dark font-poppins antialiased;
+    font-weight: 300;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins tracking-tight;
+    font-weight: 500;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-6 md:px-8;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-primary-hover transition-all flex items-center justify-center gap-2;
+  }
+  
+  .btn-outline {
+    @apply px-6 py-3 border border-text-dark/10 rounded-full font-semibold hover:bg-text-dark/5 transition-all;
+  }
+}

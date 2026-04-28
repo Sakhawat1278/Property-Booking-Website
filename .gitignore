@@ -1,0 +1,17 @@
+node_modules
+.env
+dist
+build
+.next
+.cache
+package-lock.json
+client/node_modules
+server/node_modules
+server/dev.db
+server/dev.db-journal
+.DS_Store
+*.log
+.prisma
+*.mp4
+*.mov
+*.wmv
