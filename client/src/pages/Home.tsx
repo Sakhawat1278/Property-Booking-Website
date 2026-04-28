@@ -49,15 +49,17 @@ const Home = () => {
         {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
           <section className="relative h-[calc(100vh-96px)] w-full rounded-[24px] overflow-hidden flex items-center px-8">
-            {/* Background Video */}
-            <div className="absolute inset-0 z-0">
+            {/* Background Video with Fallback */}
+            <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <video
-                src="https://drive.google.com/uc?export=download&id=1aeiSnldzgZWUHpxU6eWG_UqpMPAcm8O-"
+                src="https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-building-with-glass-windows-44288-large.mp4"
                 autoPlay
                 muted
                 loop
                 playsInline
                 className="w-full h-full object-cover"
+                onCanPlayThrough={(e) => (e.currentTarget.style.opacity = "1")}
+                style={{ opacity: 0, transition: 'opacity 1s ease-in-out' }}
               />
               <div className="absolute inset-0 bg-black/50" />
             </div>
