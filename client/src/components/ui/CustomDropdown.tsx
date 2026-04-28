@@ -46,6 +46,10 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
   };
 
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: -4 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
     <div className="flex-1 w-full px-3 py-1.5 flex items-center gap-2 relative group" ref={dropdownRef}>
