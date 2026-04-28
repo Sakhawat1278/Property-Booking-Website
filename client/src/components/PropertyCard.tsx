@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Star, Bed, Bath, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Bed, Bath, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PropertyCardProps {
   property: any;
@@ -84,7 +84,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, index }) => {
 
         {/* Carousel Dots */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-          {images.map((_, i) => (
+          {images.map((_: string, i: number) => (
             <div 
               key={i} 
               className={`transition-all duration-300 rounded-full ${i === currentImageIndex ? 'w-2.5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'}`} 

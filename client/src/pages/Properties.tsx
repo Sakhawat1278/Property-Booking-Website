@@ -1,21 +1,15 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
-import { Star, Home as HomeIcon, Heart, Users, Bed, Bath, Building2, Landmark, Tent, MapPin, Maximize2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Home as HomeIcon, Building2, Landmark, Tent } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
 import CustomDropdown from '../components/ui/CustomDropdown';
 import PropertyCard from '../components/PropertyCard';
 
-// Inline Icons
-const IconLocation = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
-const IconArrowUpRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>;
 const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
-const IconFilters = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>;
 
 const Properties = () => {
-  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     status: 'All',
     category: 'All',
@@ -37,7 +31,7 @@ const Properties = () => {
     ...Array.from({ length: 30 }, (_, i) => ({ label: `${i + 1}+`, value: `${i + 1}+` }))
   ];
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProperties = async () => {
       try {
         const response = await fetch('http://localhost:3001/api/properties');

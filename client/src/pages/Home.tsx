@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Star, ArrowUpRight, Home as HomeIcon, MapPin, BarChart3, ShieldCheck, Key, Bed, Bath, Maximize2, Heart, Users, Quote } from 'lucide-react';
+import { ArrowUpRight, Home as HomeIcon, BarChart3, ShieldCheck, Key, Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
 import CustomDropdown from '../components/ui/CustomDropdown';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
@@ -10,7 +10,7 @@ import PropertyCard from '../components/PropertyCard';
 
 const Home = () => {
   const [propertyType, setPropertyType] = useState('luxury-villa');
-  const [priceRange, setPriceRange] = useState([500000, 5000000]);
+  const [, setPriceRange] = useState([500000, 5000000]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const [properties, setProperties] = useState<any[]>([]);

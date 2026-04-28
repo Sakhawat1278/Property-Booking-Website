@@ -45,36 +45,13 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
     setIsOpen(!isOpen);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: dropdownPosition === 'bottom' ? 5 : -5, scale: 0.98 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { 
-        duration: 0.15, 
-        ease: [0.23, 1, 0.32, 1],
-        when: "beforeChildren",
-        staggerChildren: 0.03
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      y: dropdownPosition === 'bottom' ? 5 : -5, 
-      transition: { duration: 0.1, ease: 'easeIn' }
-    }
-  };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: -4 },
-    visible: { opacity: 1, y: 0 },
-  };
 
   return (
     <div className="flex-1 w-full px-3 py-1.5 flex items-center gap-2 relative group" ref={dropdownRef}>
       {icon && (
         <div className="text-brand/70 group-hover:text-brand transition-colors duration-300">
-          {React.cloneElement(icon as React.ReactElement, { size: 16 })}
+          {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { size: 16 })}
         </div>
       )}
       <div className="flex flex-col flex-1 cursor-pointer select-none" onClick={toggleDropdown}>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { 
-  ChevronLeft, Share, Heart, MapPin, Bed, Bath, Maximize2, 
+  MapPin, Maximize2, 
   Star, Home, ArrowUpRight, CheckCircle2, Phone, Mail,
-  ShieldCheck, GraduationCap, Ruler, Info, DollarSign,
-  Key, Wallet, Sofa, Zap, PawPrint, Clock, TrendingUp, FileText
+  ShieldCheck, GraduationCap, Ruler, DollarSign,
+  Zap, PawPrint, TrendingUp, FileText
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import PropertyDetailsFooter from '../components/PropertyDetailsFooter';
