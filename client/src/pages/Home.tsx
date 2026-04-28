@@ -52,7 +52,7 @@ const Home = () => {
             {/* Background Video */}
             <div className="absolute inset-0 z-0">
               <video
-                src="/hero-bg.mp4"
+                src="https://drive.google.com/uc?export=download&id=1aeiSnldzgZWUHpxU6eWG_UqpMPAcm8O-"
                 autoPlay
                 muted
                 loop
