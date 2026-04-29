@@ -45,4 +45,8 @@
   .btn-outline {
     @apply px-6 py-3 border border-text-dark/10 rounded-full font-semibold hover:bg-text-dark/5 transition-all;
   }
+
+  .input-edit {
+    @apply w-full h-10 px-4 bg-gray-50 border border-gray-200 rounded-xl text-[13px] text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A] focus:bg-white transition-all;
+  }
 }
