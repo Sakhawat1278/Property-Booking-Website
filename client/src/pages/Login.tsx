@@ -36,6 +36,11 @@ const Login = () => {
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
+  // ── Hardcoded Admin Credentials ─────────────────────────────────────────
+  const ADMIN_EMAIL = 'admin@nestory.com';
+  const ADMIN_PASSWORD = 'Admin@1234';
+  // ─────────────────────────────────────────────────────────────────────────
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -44,11 +49,20 @@ const Login = () => {
     // Simulate API delay
     setTimeout(() => {
       if (email && password) {
-        authLogin({
-          user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
-          token: 'mock-token-' + Date.now()
-        });
-        navigate('/');
+        // Check for hardcoded admin credentials first
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+          authLogin({
+            user: { id: 'admin-001', email, name: 'Admin', role: 'ADMIN' },
+            token: 'admin-token-' + Date.now()
+          });
+          navigate('/admin');
+        } else {
+          authLogin({
+            user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
+            token: 'mock-token-' + Date.now()
+          });
+          navigate('/');
+        }
       } else {
         setError('Invalid credentials');
       }

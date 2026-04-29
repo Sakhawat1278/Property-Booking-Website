@@ -111,10 +111,8 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ selectedDate, onCha
   };
 
   return (
-    <div className="flex-1 w-full px-6 py-3 flex items-center gap-3 relative" ref={dropdownRef}>
-      <div className="p-2 bg-brand/10 rounded-full text-brand">
-        <CalendarIcon size={18} />
-      </div>
+    <div className="flex-1 w-full px-4 flex items-center gap-3 relative" ref={dropdownRef}>
+      <CalendarIcon size={14} className="text-gray-400 flex-shrink-0" />
       <div className="flex flex-col flex-1 cursor-pointer" onClick={toggleDatePicker}>
         <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">{label}</span>
         <span className="text-[#1A1A1A] text-[15px] font-medium">

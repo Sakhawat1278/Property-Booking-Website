@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ArrowUpRight, Home as HomeIcon, BarChart3, ShieldCheck, Key, Quote } from 'lucide-react';
@@ -7,12 +8,15 @@ import CustomDropdown from '../components/ui/CustomDropdown';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
 import CustomDatePicker from '../components/ui/CustomDatePicker';
 import PropertyCard from '../components/PropertyCard';
+import LocationAutocomplete from '../components/ui/LocationAutocomplete';
 import { properties as localProperties } from '../data/properties';
 
 const Home = () => {
-  const [propertyType, setPropertyType] = useState('luxury-villa');
-  const [, setPriceRange] = useState([500000, 5000000]);
+  const navigate = useNavigate();
+  const [propertyType, setPropertyType] = useState('All');
+  const [priceRange, setPriceRange] = useState([500000, 5000000]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [location, setLocation] = useState('');
   
   const [properties] = useState<any[]>(localProperties);
   const [loading] = useState(false);
@@ -24,11 +28,23 @@ const Home = () => {
   const featuredProperties = properties.slice(0, 5);
 
   const propertyOptions = [
-    { label: 'Luxury Villa', value: 'luxury-villa' },
-    { label: 'Modern Apartment', value: 'modern-apartment' },
-    { label: 'Townhouse', value: 'townhouse' },
-    { label: 'Penthouse', value: 'penthouse' },
+    { label: 'All Types', value: 'All' },
+    { label: 'Residential', value: 'Residential' },
+    { label: 'Commercial', value: 'Commercial' },
+    { label: 'Luxury', value: 'Luxury' },
+    { label: 'Vacation', value: 'Vacation' },
   ];
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (location) params.append('location', location);
+    if (propertyType) params.append('type', propertyType);
+    params.append('minPrice', priceRange[0].toString());
+    params.append('maxPrice', priceRange[1].toString());
+    params.append('date', selectedDate.toISOString());
+    
+    navigate(`/properties?${params.toString()}`);
+  };
 
   return (
     <div className="min-h-screen bg-white font-poppins selection:bg-brand selection:text-white">
@@ -121,12 +137,11 @@ const Home = () => {
                 <div className="p-2 bg-brand/10 rounded-full text-brand">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Location</span>
-                  <input 
-                    type="text" 
-                    placeholder="Search city, area..." 
-                    className="bg-transparent text-[#1A1A1A] placeholder:text-gray-300 outline-none text-[15px] font-medium w-full"
+                <div className="flex flex-col flex-1 relative">
+                  <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Location</span>
+                  <LocationAutocomplete 
+                    variant="hero" 
+                    onLocationSelect={setLocation} 
                   />
                 </div>
               </div>
@@ -164,6 +179,7 @@ const Home = () => {
 
               {/* Search Button */}
               <motion.button 
+                onClick={handleSearch}
                 whileHover="hover"
                 className="group relative flex items-center gap-4 bg-brand text-white pl-6 pr-1 h-10 rounded-full overflow-hidden"
               >

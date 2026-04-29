@@ -1,0 +1,327 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
+// SVGs from Login.tsx
+const IconArrowLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
+const IconArrowRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>;
+const IconMail = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+const IconLock = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+const IconUser = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const IconPhone = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+const IconBriefcase = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
+const IconMapPin = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+const IconShield = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>;
+const IconGlobe = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>;
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+type AuthMode = 'login' | 'signup' | 'forgot';
+
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const [mode, setMode] = useState<AuthMode>('login');
+  const [role, setRole] = useState<'USER' | 'OWNER' | 'BUILDER'>('USER');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [address, setAddress] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [website, setWebsite] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { login: authLogin } = useAuth();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    setTimeout(() => {
+      if (email && password) {
+        authLogin({
+          user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
+          token: 'mock-token-' + Date.now()
+        });
+        if (onSuccess) onSuccess();
+        onClose();
+      } else {
+        setError('Invalid credentials');
+      }
+      setLoading(false);
+    }, 1000);
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    setTimeout(() => {
+      authLogin({
+        user: { id: Date.now().toString(), email, name, role },
+        token: 'mock-token-' + Date.now()
+      });
+      if (onSuccess) onSuccess();
+      onClose();
+      setLoading(false);
+    }, 1000);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[100] bg-black/60"
+          />
+
+          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ 
+                layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.3 },
+                scale: { duration: 0.3 }
+              }}
+              style={{ 
+                width: mode === 'login' ? 380 : 
+                       mode === 'forgot' ? 380 :
+                       role === 'USER' ? 400 :
+                       role === 'OWNER' ? 500 : 550 
+              }}
+              className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl pointer-events-auto relative overflow-hidden"
+            >
+              <button 
+                onClick={onClose}
+                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#1A1A1A] hover:bg-gray-100 rounded-full transition-all z-10"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-10 h-10 mb-2">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path d="M20 45L50 20L80 45V75C80 77.7614 77.7614 80 75 80H25C22.2386 80 20 77.7614 20 75V45Z" fill="none" stroke="#FF4D00" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M42 80V55H58V80" fill="none" stroke="#FF4D00" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="50" cy="40" r="3" fill="#FF4D00" />
+                  </svg>
+                </div>
+                <h1 className="text-[18px] font-normal tracking-tight text-brand uppercase">Nestory</h1>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {mode === 'login' && (
+                  <motion.div
+                    key="login"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="mb-6">
+                      <h2 className="text-[22px] font-medium text-[#1A1A1A] mb-1">Welcome back</h2>
+                      <p className="text-gray-400 text-[13px]">Access your account to continue</p>
+                    </div>
+
+                    {error && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-500 text-[12px] font-medium animate-shake">
+                        {error}
+                      </div>
+                    )}
+
+                    <form className="space-y-3" onSubmit={handleLogin}>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
+                          <IconMail />
+                        </div>
+                        <input 
+                          type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Email address" required
+                          className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all placeholder:text-gray-300"
+                        />
+                      </div>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
+                          <IconLock />
+                        </div>
+                        <input 
+                          type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Password" required
+                          className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all placeholder:text-gray-300"
+                        />
+                      </div>
+                      <div className="flex justify-end px-1">
+                        <button type="button" onClick={() => setMode('forgot')} className="text-[11px] font-medium text-brand hover:underline">Forgot password?</button>
+                      </div>
+                      <div className="flex justify-center mt-6">
+                        <motion.button 
+                          whileHover="shineHover"
+                          disabled={loading}
+                          type="submit"
+                          className="group relative h-10 bg-brand text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-4 transition-all"
+                        >
+                          <span className="text-[13px] font-normal">{loading ? 'Signing in...' : 'Sign in'}</span>
+                          <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
+                            <IconArrowRight />
+                          </div>
+                        </motion.button>
+                      </div>
+                    </form>
+                    <p className="mt-8 text-center text-gray-400 text-[12px]">
+                      New here? <button onClick={() => setMode('signup')} className="font-bold text-brand hover:underline">Create account</button>
+                    </p>
+                  </motion.div>
+                )}
+
+                {mode === 'signup' && (
+                  <motion.div
+                    key="signup"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="mb-6">
+                      <h2 className="text-[22px] font-medium text-[#1A1A1A] mb-1">Create account</h2>
+                      <p className="text-gray-400 text-[13px]">Join Nestory today</p>
+                    </div>
+
+                    <div className="mb-6">
+                      <div className="grid grid-cols-3 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
+                        {['USER', 'OWNER', 'BUILDER'].map((r) => (
+                          <button 
+                            key={r}
+                            type="button"
+                            onClick={() => setRole(r as any)}
+                            className={`h-8 rounded-full text-[10px] font-bold transition-all ${role === r ? 'bg-brand text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                          >
+                            {r === 'USER' ? 'Buyer' : r.charAt(0) + r.slice(1).toLowerCase()}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <form className="space-y-3" onSubmit={handleSignup}>
+                      <div className={`grid ${role === 'USER' ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
+                        <div className="relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconUser /></div>
+                          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" required className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                        </div>
+                        <div className="relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconPhone /></div>
+                          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                        </div>
+                        {(role === 'OWNER' || role === 'BUILDER') && (
+                          <div className="relative col-span-2">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconBriefcase /></div>
+                            <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder={role === 'OWNER' ? 'Property / Business Name' : 'Company Name'} className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                          </div>
+                        )}
+
+                        {role === 'OWNER' && (
+                          <div className="relative col-span-2">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconMapPin /></div>
+                            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Primary Address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                          </div>
+                        )}
+
+                        {role === 'BUILDER' && (
+                          <>
+                            <div className="relative">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconShield /></div>
+                              <input type="text" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} placeholder="License Number" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                            </div>
+                            <div className="relative">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconGlobe /></div>
+                              <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="Company Website" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconMail /></div>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" required className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                      </div>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconLock /></div>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                      </div>
+
+                      <div className="flex justify-center mt-6">
+                        <motion.button 
+                          whileHover="shineHover"
+                          disabled={loading}
+                          type="submit"
+                          className="group relative h-10 bg-brand text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-6 transition-all"
+                        >
+                          <span className="text-[13px] font-normal">{loading ? 'Creating...' : 'Create Account'}</span>
+                          <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
+                            <IconArrowRight />
+                          </div>
+                        </motion.button>
+                      </div>
+                    </form>
+                    <p className="mt-8 text-center text-gray-400 text-[12px]">
+                      Already joined? <button onClick={() => setMode('login')} className="font-bold text-brand hover:underline">Sign in</button>
+                    </p>
+                  </motion.div>
+                )}
+
+                {mode === 'forgot' && (
+                  <motion.div
+                    key="forgot"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="mb-6">
+                      <button onClick={() => setMode('login')} className="flex items-center gap-2 text-brand text-[12px] font-bold mb-4 group">
+                        <div className="group-hover:-translate-x-1 transition-transform scale-90"><IconArrowLeft /></div>
+                        Back to Login
+                      </button>
+                      <h2 className="text-[22px] font-medium text-[#1A1A1A] mb-1">Reset Password</h2>
+                      <p className="text-gray-400 text-[13px]">Enter your email for the link</p>
+                    </div>
+                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconMail /></div>
+                        <input type="email" placeholder="Email address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                      </div>
+                      <div className="flex justify-center mt-6">
+                        <motion.button type="submit" className="group relative h-10 bg-[#1A1A1A] text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-6 transition-all">
+                          <span className="text-[13px] font-normal">Send Link</span>
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
+                            <IconArrowRight />
+                          </div>
+                        </motion.button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default AuthModal;

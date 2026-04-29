@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home as HomeIcon, Building2, Landmark, Tent } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
 import CustomDropdown from '../components/ui/CustomDropdown';
+import LocationAutocomplete from '../components/ui/LocationAutocomplete';
 import PropertyCard from '../components/PropertyCard';
 
 const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
@@ -12,11 +13,20 @@ const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fi
 import { properties as localProperties } from '../data/properties';
 
 const Properties = () => {
+  const [searchParams] = useSearchParams();
+  
+  // Extract parameters passed from Home page search bar
+  const initialLocation = searchParams.get('location') || '';
+  const initialCategory = searchParams.get('type') || searchParams.get('category') || 'All';
+  const initialMinPrice = searchParams.get('minPrice') || '';
+  const initialMaxPrice = searchParams.get('maxPrice') || '';
+
   const [filters, setFilters] = useState({
+    location: initialLocation,
     status: 'All',
-    category: 'All',
-    minPrice: '',
-    maxPrice: '',
+    category: initialCategory,
+    minPrice: initialMinPrice,
+    maxPrice: initialMaxPrice,
     minArea: '',
     maxArea: '',
     bedrooms: 'Any',
@@ -38,6 +48,17 @@ const Properties = () => {
   }, []);
 
   const filteredProperties = properties.filter(p => {
+    // 0. Location Filter (Global Search)
+    if (filters.location !== '') {
+      const searchLoc = filters.location.toLowerCase();
+      const propLoc = `${p.city || ''} ${p.country || ''} ${p.neighborhood || ''}`.toLowerCase();
+      
+      // Check if property city is inside the search result (e.g., "Tokyo" in "Tokyo, Japan")
+      // OR check if the search result is inside the property location
+      const isMatch = searchLoc.includes(p.city?.toLowerCase() || 'XX') || propLoc.includes(searchLoc);
+      if (!isMatch) return false;
+    }
+
     // 1. Status Filter
     if (filters.status !== 'All') {
       if (filters.status === 'For Sale' && p.status !== 'FOR_SALE') return false;
@@ -101,8 +122,16 @@ const Properties = () => {
       <div className="flex flex-col lg:flex-row flex-1 pt-20">
         
         {/* Sidebar */}
-        <aside className="w-full lg:w-[260px] bg-white border-r border-gray-200 lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 overflow-y-auto p-4 flex flex-col gap-3 shrink-0 custom-scrollbar">
+        <aside className="w-full lg:w-[260px] bg-white border-r border-gray-200 lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 overflow-y-auto p-4 flex flex-col gap-5 shrink-0 custom-scrollbar z-40">
               
+          {/* Location Search */}
+          <div>
+            <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Location</h3>
+            <LocationAutocomplete 
+              onLocationSelect={(loc) => setFilters({ ...filters, location: loc })} 
+            />
+          </div>
+
           {/* Status Filter */}
               <div>
                 <h3 className="text-[12px] font-bold text-[#1A1A1A] mb-1.5">Listing Status</h3>
