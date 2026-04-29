@@ -9,6 +9,8 @@ import PropertyCard from '../components/PropertyCard';
 
 const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
 
+import { properties as localProperties } from '../data/properties';
+
 const Properties = () => {
   const [filters, setFilters] = useState({
     status: 'All',
@@ -23,8 +25,8 @@ const Properties = () => {
     minROI: '',
     verifiedOnly: false
   });
-  const [properties, setProperties] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [properties] = useState<any[]>(localProperties);
+  const [loading, setLoading] = useState(false);
 
   const numberOptions = [
     { label: 'Any', value: 'Any' },
@@ -32,19 +34,7 @@ const Properties = () => {
   ];
 
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${apiUrl}/api/properties`);
-        const data = await response.json();
-        setProperties(data);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProperties();
+    window.scrollTo(0, 0);
   }, []);
 
   const filteredProperties = properties.filter(p => {

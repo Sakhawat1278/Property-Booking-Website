@@ -6,29 +6,18 @@ import { motion } from 'framer-motion';
 import CustomDropdown from '../components/ui/CustomDropdown';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
 import CustomDatePicker from '../components/ui/CustomDatePicker';
-import PropertyCard from '../components/PropertyCard';
+import { properties as localProperties } from '../data/properties';
 
 const Home = () => {
   const [propertyType, setPropertyType] = useState('luxury-villa');
   const [, setPriceRange] = useState([500000, 5000000]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   
-  const [properties, setProperties] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [properties] = useState<any[]>(localProperties);
+  const [loading] = useState(false);
 
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/api/properties');
-        const data = await response.json();
-        setProperties(data);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProperties();
+    window.scrollTo(0, 0);
   }, []);
 
   const featuredProperties = properties.slice(0, 5);

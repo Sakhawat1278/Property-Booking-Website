@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import PropertyDetailsFooter from '../components/PropertyDetailsFooter';
+import { properties as localProperties } from '../data/properties';
 
 const SimpleSlick = () => {
   const { slug } = useParams();
@@ -17,20 +18,13 @@ const SimpleSlick = () => {
   const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
-    const fetchProperty = async () => {
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${apiUrl}/api/properties/${slug}`);
-        if (!response.ok) throw new Error('Property not found');
-        const data = await response.json();
-        setProperty(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching property:', error);
-        navigate('/properties');
-      }
-    };
-    if (slug) fetchProperty();
+    const foundProperty = localProperties.find(p => p.slug === slug);
+    if (foundProperty) {
+      setProperty(foundProperty);
+      setLoading(false);
+    } else {
+      navigate('/properties');
+    }
     window.scrollTo(0, 0);
   }, [slug, navigate]);
 

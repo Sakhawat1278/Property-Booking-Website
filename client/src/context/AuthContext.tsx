@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+
 
 interface User {
   id: string;
@@ -24,21 +24,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = () => {
       const storedToken = localStorage.getItem('token');
-      if (storedToken) {
-        try {
-          // Verify token with backend if needed
-          const response = await axios.get('http://localhost:3001/api/auth/me', {
-            headers: { Authorization: `Bearer ${storedToken}` }
-          });
-          setUser(response.data);
-          setToken(storedToken);
-        } catch (error) {
-          localStorage.removeItem('token');
-          setToken(null);
-          setUser(null);
-        }
+      const storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
+        setUser(JSON.parse(storedUser));
+        setToken(storedToken);
       }
       setIsLoading(false);
     };
@@ -49,12 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(user);
     setToken(token);
     localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (

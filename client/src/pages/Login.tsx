@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
 
 // Inline SVG Components for compatibility
 const IconArrowLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
@@ -41,41 +40,35 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', { email, password });
-      authLogin(response.data);
-      navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
-    } finally {
+    
+    // Simulate API delay
+    setTimeout(() => {
+      if (email && password) {
+        authLogin({
+          user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
+          token: 'mock-token-' + Date.now()
+        });
+        navigate('/');
+      } else {
+        setError('Invalid credentials');
+      }
       setLoading(false);
-    }
+    }, 1000);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:3001/api/auth/register', { 
-        email, 
-        password, 
-        name, 
-        role,
-        phone,
-        businessName,
-        address,
-        licenseNumber,
-        website,
-        experience
+
+    setTimeout(() => {
+      authLogin({
+        user: { id: Date.now().toString(), email, name, role },
+        token: 'mock-token-' + Date.now()
       });
-      authLogin(response.data);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Signup failed');
-    } finally {
       setLoading(false);
-    }
+    }, 1000);
   };
 
   const containerVariants = {
