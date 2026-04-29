@@ -61,7 +61,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({ message: 'Invalid input', errors: error.errors });
+        return reply.status(400).send({ message: 'Invalid input', errors: error.issues });
       }
       return reply.status(500).send({ message: 'Internal server error', error: (error as Error).message });
     }
@@ -93,7 +93,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({ message: 'Invalid input', errors: error.errors });
+        return reply.status(400).send({ message: 'Invalid input', errors: error.issues });
       }
       return reply.status(500).send({ message: 'Internal server error' });
     }
