@@ -282,8 +282,7 @@ const Properties = () => {
           </>
         )}
       </AnimatePresence>
-
-      <div className="flex flex-row flex-1 pt-20 lg:pt-20">
+      <div className="flex flex-row flex-1 pt-16 lg:pt-20">
         
         {/* Desktop Sidebar — hidden on mobile */}
         <aside className="hidden lg:flex lg:w-[260px] bg-white border-r border-gray-200 lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 overflow-y-auto flex-col shrink-0 custom-scrollbar z-40">
