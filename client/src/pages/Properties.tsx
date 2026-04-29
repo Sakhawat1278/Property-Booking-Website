@@ -242,17 +242,6 @@ const Properties = () => {
     <div className="min-h-screen bg-[#F8F9FA] font-poppins flex flex-col">
       <Navbar />
       
-      {/* Mobile Filter Bar */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-100 px-4 py-2 flex items-center justify-between">
-        <p className="text-[12px] font-semibold text-gray-500">{filteredProperties.length} properties found</p>
-        <button
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-2 px-4 h-8 bg-[#1A1A1A] text-white rounded-full text-[12px] font-medium"
-        >
-          <SlidersHorizontal size={13} />
-          Filters
-        </button>
-      </div>
 
       {/* Mobile Filter Drawer */}
       <AnimatePresence>
@@ -302,7 +291,19 @@ const Properties = () => {
         </aside>
         
         {/* Main Content (Grid) */}
-        <main className="flex-1 p-4 lg:p-8 w-full pt-14 lg:pt-4">
+        <main className="flex-1 p-4 lg:p-8 w-full pt-0 lg:pt-4">
+          
+          {/* Mobile Filter Bar (Sticky within main) */}
+          <div className="lg:hidden sticky top-16 -mx-4 mb-4 px-4 py-2 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 flex items-center justify-between">
+            <p className="text-[12px] font-semibold text-gray-500">{filteredProperties.length} properties found</p>
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="flex items-center gap-2 px-4 h-8 bg-[#1A1A1A] text-white rounded-full text-[12px] font-medium shadow-sm"
+            >
+              <SlidersHorizontal size={13} />
+              Filters
+            </button>
+          </div>
           
           {/* Grid */}
             {loading ? (
