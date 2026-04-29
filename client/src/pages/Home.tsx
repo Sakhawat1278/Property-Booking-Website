@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import CustomDropdown from '../components/ui/CustomDropdown';
 import PriceRangeSlider from '../components/ui/PriceRangeSlider';
 import CustomDatePicker from '../components/ui/CustomDatePicker';
+import PropertyCard from '../components/PropertyCard';
 import { properties as localProperties } from '../data/properties';
 
 const Home = () => {
