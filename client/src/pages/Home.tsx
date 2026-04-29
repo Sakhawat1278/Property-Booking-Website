@@ -51,10 +51,10 @@ const Home = () => {
       <Navbar />
       
       {/* Main Hero Container - Uniform 8px Frame */}
-      <main className="pt-[88px] px-2 flex flex-col gap-2">
+      <main className="pt-[72px] md:pt-[88px] px-2 flex flex-col gap-2">
         {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
-          <section className="relative h-[calc(100vh-96px)] w-full rounded-[24px] overflow-hidden flex items-center px-8">
+          <section className="relative h-[75vh] md:h-[calc(100vh-96px)] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
             {/* Background Video with Image Fallback */}
             <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <img 
@@ -79,7 +79,7 @@ const Home = () => {
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="text-white text-[64px] font-semibold leading-[1.1] tracking-tight mb-8"
+                  className="text-white text-[36px] sm:text-[48px] md:text-[64px] font-semibold leading-[1.1] tracking-tight mb-6 md:mb-8"
                 >
                   Explore Exclusive Property <br />
                   Deals with Up to <span className="text-brand">40%</span> <br />
@@ -90,7 +90,7 @@ const Home = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
-                  className="text-white/80 text-[18px] font-light max-w-2xl leading-relaxed mb-12"
+                  className="text-white/80 text-[14px] md:text-[18px] font-light max-w-2xl leading-relaxed mb-8 md:mb-12"
                 >
                   Uncover top-tier homes at reduced rates. Your dream property awaits, priced to sell. Don't miss out on smart savings.
                 </motion.p>
@@ -125,15 +125,15 @@ const Home = () => {
           </section>
 
           {/* Floating Interactive Search Bar - Outside overflow-hidden section */}
-          <motion.div 
+            <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="absolute bottom-[20px] left-1/2 -translate-x-1/2 w-full max-w-6xl z-20 px-8"
+            className="absolute bottom-[12px] md:bottom-[20px] left-1/2 -translate-x-1/2 w-full max-w-6xl z-20 px-3 md:px-8"
           >
-            <div className="bg-white p-2 pr-6 rounded-2xl md:rounded-full border border-gray-100 flex flex-col md:flex-row items-center gap-2">
+            <div className="bg-white p-3 md:p-2 md:pr-6 rounded-2xl md:rounded-full border border-gray-100 flex flex-col md:flex-row items-stretch md:items-center gap-0 md:gap-2">
               {/* Location Search */}
-              <div className="flex-1 w-full px-6 py-3 flex items-center gap-3 border-r border-gray-100 last:border-r-0">
+              <div className="flex-1 w-full px-4 md:px-6 py-3 flex items-center gap-3 border-b md:border-b-0 md:border-r border-gray-100">
                 <div className="p-2 bg-brand/10 rounded-full text-brand">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
@@ -147,7 +147,7 @@ const Home = () => {
               </div>
 
               {/* Property Type */}
-              <div className="flex-1 border-r border-gray-100 last:border-r-0">
+              <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <CustomDropdown 
                   label="Type"
                   value={propertyType}
@@ -158,7 +158,7 @@ const Home = () => {
               </div>
 
               {/* Budget Range */}
-              <div className="flex-1 border-r border-gray-100 last:border-r-0">
+              <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <PriceRangeSlider 
                   label="Budget"
                   min={100000}
@@ -169,7 +169,7 @@ const Home = () => {
               </div>
 
               {/* Date Picker */}
-              <div className="flex-1 border-r border-gray-100 last:border-r-0">
+              <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <CustomDatePicker 
                   label="Available From"
                   selectedDate={selectedDate}
@@ -178,26 +178,24 @@ const Home = () => {
               </div>
 
               {/* Search Button */}
-              <motion.button 
-                onClick={handleSearch}
-                whileHover="hover"
-                className="group relative flex items-center gap-4 bg-brand text-white pl-6 pr-1 h-10 rounded-full overflow-hidden"
-              >
-                <span className="text-[14px] font-normal">Find Property</span>
-                <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45">
-                  <ArrowUpRight size={16} strokeWidth={2} />
-                </div>
-                
-                {/* Subtle Shine Effect */}
-                <motion.div
-                  variants={{
-                    hover: { x: '100%' }
-                  }}
-                  initial={{ x: '-100%' }}
-                  transition={{ duration: 0.6, ease: 'easeInOut' }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                />
-              </motion.button>
+              <div className="pt-3 pb-1 md:pt-0 md:pb-0 flex justify-center md:block">
+                <motion.button 
+                  onClick={handleSearch}
+                  whileHover="hover"
+                  className="group relative flex items-center gap-4 bg-brand text-white pl-6 pr-1 h-10 rounded-full overflow-hidden w-full md:w-auto justify-center"
+                >
+                  <span className="text-[14px] font-normal">Find Property</span>
+                  <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45">
+                    <ArrowUpRight size={16} strokeWidth={2} />
+                  </div>
+                  <motion.div
+                    variants={{ hover: { x: '100%' } }}
+                    initial={{ x: '-100%' }}
+                    transition={{ duration: 0.6, ease: 'easeInOut' }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                  />
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </div>

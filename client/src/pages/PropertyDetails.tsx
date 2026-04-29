@@ -237,13 +237,13 @@ const PropertyDetails = () => {
         </div>
 
         {/* MAIN CONTENT AREA - 70/30 Sticky Architecture */}
-        <div className="px-8 mt-0 flex gap-6 items-start">
+        <div className="px-4 md:px-8 mt-0 flex flex-col lg:flex-row gap-6 items-start">
           
           {/* Left Column (Main Details) - 70% */}
-          <div className="w-[70%] flex flex-col gap-4">
+          <div className="w-full lg:w-[70%] flex flex-col gap-4">
             
             {/* 1. HERO GALLERY SECTION */}
-            <div className="flex flex-col gap-4 h-[calc(100vh-160px)] min-h-[700px]">
+            <div className="flex flex-col gap-4 h-[60vh] md:h-[calc(100vh-160px)] min-h-[400px] md:min-h-[700px]">
               {/* Main Image Section */}
               <section 
                 onClick={() => setIsLightboxOpen(true)}
@@ -676,8 +676,8 @@ const PropertyDetails = () => {
           </div>
 
           {/* Right Column (Sticky Info Card) - 30% */}
-          <aside className="w-[30%] sticky top-[140px] self-start pb-8">
-            <section className="bg-white rounded-2xl border border-gray-300 p-8 flex flex-col shadow-none min-h-[600px]">
+          <aside className="w-full lg:w-[30%] lg:sticky lg:top-[140px] self-start pb-8">
+            <section className="bg-white rounded-2xl border border-gray-300 p-5 md:p-8 flex flex-col shadow-none min-h-[400px] md:min-h-[600px]">
               <AnimatePresence mode="wait">
                 {sidebarMode === 'INFO' ? (
                   <motion.div 
