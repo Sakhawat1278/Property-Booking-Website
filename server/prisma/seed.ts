@@ -227,7 +227,15 @@ async function main() {
 
   for (const data of propertyData) {
     await prisma.property.create({
-      data: data,
+      data: {
+        ...data,
+        neighborhoodSafety: 9.0 + Math.random(),
+        serviceCharges: 1200 + Math.random() * 500,
+        propertyTax: 2400 + Math.random() * 1000,
+        nearbySchools: "Elite Academy (0.8km), Westside High (1.5km)",
+        roomBreakdown: "Master: 20x15, Living: 25x20",
+        rentalYield: 5.2 + Math.random() * 3,
+      },
     });
   }
 

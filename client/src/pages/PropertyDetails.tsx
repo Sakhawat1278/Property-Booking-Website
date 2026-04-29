@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MapPin, Maximize2, 
-  Star, Home, ArrowUpRight, CheckCircle2, Phone, Mail,
-  ShieldCheck, GraduationCap, Ruler, DollarSign,
-  Zap, PawPrint, TrendingUp, FileText
+  MapPin, Maximize2, Bed, Bath, Share2, Heart, ChevronLeft, 
+  ArrowUpRight, ShieldCheck, GraduationCap, TrendingUp, Zap, 
+  FileText, Calendar, Info
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import PropertyDetailsFooter from '../components/PropertyDetailsFooter';
 
-const PropertyDetails = () => {
+const SimpleSlick = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeImage, setActiveImage] = useState(0);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/properties/${slug}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${apiUrl}/api/properties/${slug}`);
         if (!response.ok) throw new Error('Property not found');
         const data = await response.json();
         setProperty(data);
@@ -30,300 +30,186 @@ const PropertyDetails = () => {
         navigate('/properties');
       }
     };
-
-    if (slug) {
-      fetchProperty();
-    }
+    if (slug) fetchProperty();
     window.scrollTo(0, 0);
   }, [slug, navigate]);
 
   if (loading || !property) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-2 border-brand/20 border-t-brand rounded-full animate-spin mb-4"></div>
-        <p className="text-[12px] font-medium text-gray-400 tracking-widest uppercase">Syncing Deep Data...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-6 h-6 border border-gray-200 border-t-black rounded-full animate-spin"></div>
       </div>
     );
   }
 
   const gallery = property.imageGallery ? property.imageGallery.split(',') : [property.primaryImage];
-  const isSale = property.status === 'FOR_SALE' || property.status === 'OFF_PLAN';
 
   return (
-    <div className="min-h-screen bg-white font-poppins selection:bg-brand selection:text-white">
+    <div className="min-h-screen bg-white font-poppins text-[#1A1A1A]">
       <Navbar />
       
-      <main className="pt-[88px] px-2 pb-32">
-        
-        {/* Gallery Section */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12">
-           <div className="md:col-span-8 aspect-[16/10] overflow-hidden rounded-[24px] group cursor-pointer relative">
-              <img src={gallery[activeImage]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={property.title} />
-              <div className="absolute bottom-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md text-white text-[12px] font-bold rounded-full border border-white/20">
-                 Perspective {activeImage + 1} / {gallery.length}
+      <main className="pt-[88px] px-2 max-w-[1600px] mx-auto pb-32">
+        <div className="px-6 md:px-12 flex flex-col gap-12">
+          
+          {/* Header Section - Thin & Slick */}
+          <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-12 border-b border-gray-100 pb-12">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand">{property.status.replace('_', ' ')}</span>
+                 <div className="w-1 h-1 bg-gray-300 rounded-full" />
+                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Ref: {property.id?.slice(0,8) || 'NSTR-001'}</span>
               </div>
-           </div>
-           <div className="md:col-span-4 flex flex-col gap-4">
-              {gallery.slice(1, 3).map((img: string, i: number) => (
-                 <div key={i} onClick={() => setActiveImage(i + 1)} className="flex-1 aspect-[16/10] overflow-hidden rounded-[24px] cursor-pointer group relative">
-                    <img src={img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={`Gallery ${i + 1}`} />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+              <h1 className="text-[42px] md:text-[56px] font-light tracking-tight leading-none uppercase">
+                {property.title}
+              </h1>
+              <div className="flex items-center gap-6 text-[13px] text-gray-500 font-light">
+                 <div className="flex items-center gap-2">
+                    <MapPin size={14} strokeWidth={1.5} />
+                    {property.address}, {property.city}
                  </div>
-              ))}
-              <div className="flex-1 bg-[#1A1A1A] rounded-[24px] flex flex-col items-center justify-center text-white gap-2 cursor-pointer hover:bg-brand transition-all">
-                 <Maximize2 size={24} />
-                 <span className="text-[11px] font-bold uppercase tracking-widest">Full Gallery</span>
-              </div>
-           </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-           
-           {/* Left Column: Details */}
-           <div className="lg:col-span-8 flex flex-col gap-16">
-              
-              {/* Header Info */}
-              <div className="flex justify-between items-start border-b border-gray-100 pb-12">
-                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3">
-                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${isSale ? 'bg-brand text-white' : 'bg-blue-600 text-white'}`}>
-                          {property.status.replace('_', ' ')}
-                       </span>
-                       {property.isVerified && (
-                          <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-green-100">
-                             <ShieldCheck size={12} /> Verified
-                          </div>
-                       )}
-                    </div>
-                    <h1 className="text-[48px] font-bold text-[#1A1A1A] leading-tight tracking-tight">{property.title}</h1>
-                    <div className="flex items-center gap-8 text-gray-500 text-[15px]">
-                       <div className="flex items-center gap-2">
-                          <MapPin size={18} className="text-brand" />
-                          {property.address}, {property.city}
-                       </div>
-                       <div className="flex items-center gap-2">
-                          <Star size={18} className="text-yellow-400 fill-yellow-400" />
-                          <span className="font-bold text-[#1A1A1A]">{property.rating || '5.0'}</span>
-                          <span className="text-gray-300 font-medium">({property.reviewsCount || '12'} reviews)</span>
-                       </div>
-                    </div>
-                 </div>
-                 <div className="text-right flex flex-col gap-1">
-                    <span className="text-[42px] font-bold text-[#1A1A1A] tracking-tighter">${property.price?.toLocaleString()}</span>
-                    <p className="text-[12px] text-gray-400 uppercase tracking-[0.3em] font-black">{isSale ? 'Total Value' : `Per ${property.rentFrequency || 'Month'}`}</p>
+                 <div className="flex items-center gap-2">
+                    <ShieldCheck size={14} strokeWidth={1.5} className="text-brand" />
+                    Verified Listing
                  </div>
               </div>
+            </div>
 
-              {/* Conditional Financial Breakdown */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#F8FAFC] p-10 rounded-[32px]">
-                 <div className="flex flex-col gap-6">
-                    <h3 className="text-[13px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                       <DollarSign size={16} /> Financial Overview
-                    </h3>
-                    <div className="grid grid-cols-2 gap-y-6">
-                       {isSale ? (
-                          <>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Service Charges</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">${property.serviceCharges?.toLocaleString() || '4,200'}<span className="text-[12px] text-gray-400 font-medium italic">/yr</span></span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Property Tax</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">${property.propertyTax?.toLocaleString() || '1,850'}<span className="text-[12px] text-gray-400 font-medium italic">/yr</span></span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Ownership</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">{property.ownershipType || 'Freehold'}</span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Monthly Mortgage</span>
-                                <span className="text-[18px] font-bold text-brand">From ${property.mortgageEstimate?.toLocaleString() || '3,450'}</span>
-                             </div>
-                          </>
-                       ) : (
-                          <>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Security Deposit</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">${property.securityDeposit?.toLocaleString() || '12,000'}</span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Furnishing</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">{property.furnishingStatus || 'Fully Furnished'}</span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Utilities</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">{property.utilitiesIncluded ? 'Included' : 'Not Included'}</span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Min. Lease</span>
-                                <span className="text-[18px] font-bold text-[#1A1A1A]">{property.minLeaseTerm || '12 Months'}</span>
-                             </div>
-                          </>
-                       )}
-                    </div>
-                 </div>
-                 <div className="flex flex-col gap-6 border-l border-gray-200 pl-10">
-                    <h3 className="text-[13px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                       <TrendingUp size={16} /> Market Insights
-                    </h3>
-                    <div className="grid grid-cols-2 gap-y-6">
-                       <div className="flex flex-col">
-                          <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Estimated ROI</span>
-                          <span className="text-[18px] font-bold text-brand">{property.estimatedROI || '8.5'}%</span>
-                       </div>
-                       <div className="flex flex-col">
-                          <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Neighborhood Safety</span>
-                          <span className="text-[18px] font-bold text-[#1A1A1A]">{property.neighborhoodSafety || '9.8'}<span className="text-[12px] text-gray-400 font-medium">/10</span></span>
-                       </div>
-                       <div className="flex flex-col">
-                          <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Energy Rating</span>
-                          <div className="flex items-center gap-2">
-                             <Zap size={16} className="text-yellow-500" />
-                             <span className="text-[18px] font-bold text-[#1A1A1A]">{property.energyRating || 'A+'}</span>
-                          </div>
-                       </div>
-                       <div className="flex flex-col">
-                          <span className="text-[11px] text-gray-400 font-bold uppercase mb-1">Pet Policy</span>
-                          <div className="flex items-center gap-2">
-                             <PawPrint size={16} className="text-gray-400" />
-                             <span className="text-[18px] font-bold text-[#1A1A1A]">{property.petPolicy || 'Allowed'}</span>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-              </div>
+            <div className="flex flex-col items-end gap-2">
+               <span className="text-[32px] md:text-[48px] font-light tracking-tighter">
+                  ${property.price?.toLocaleString()}
+               </span>
+               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">Total Asset Value</span>
+            </div>
+          </div>
 
-              {/* Description & Technical Dimensions */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-                 <div className="md:col-span-7 flex flex-col gap-6">
-                    <h2 className="text-[22px] font-bold text-[#1A1A1A]">Property Narrative</h2>
-                    <p className="text-[16px] text-gray-500 leading-relaxed">
-                       {property.description || "Experience unparalleled luxury in this masterfully designed property. Every detail, from the hand-selected finishes to the state-of-the-art smart systems, has been curated for the discerning occupant. The expansive living areas flow seamlessly into private outdoor sanctuaries, offering a rare balance of urban energy and serene tranquility."}
-                    </p>
-                 </div>
-                 <div className="md:col-span-5 border border-gray-100 rounded-3xl p-8 flex flex-col gap-6">
-                    <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                       <Ruler size={16} /> Dimensions
-                    </h3>
-                    <div className="flex flex-col gap-4">
-                       <div className="flex justify-between items-center py-2 border-b border-gray-50 text-[14px]">
-                          <span className="text-gray-400 font-medium">Primary Suite</span>
-                          <span className="text-[#1A1A1A] font-bold">450 sqft</span>
-                       </div>
-                       <div className="flex justify-between items-center py-2 border-b border-gray-50 text-[14px]">
-                          <span className="text-gray-400 font-medium">Living Volume</span>
-                          <span className="text-[#1A1A1A] font-bold">1,200 sqft</span>
-                       </div>
-                       <div className="flex justify-between items-center py-2 border-b border-gray-50 text-[14px]">
-                          <span className="text-gray-400 font-medium">Gourmet Kitchen</span>
-                          <span className="text-[#1A1A1A] font-bold">320 sqft</span>
-                       </div>
-                       <div className="flex justify-between items-center py-2 text-[14px]">
-                          <span className="text-gray-400 font-medium">Outdoor Terrace</span>
-                          <span className="text-[#1A1A1A] font-bold">280 sqft</span>
-                       </div>
-                    </div>
-                 </div>
-              </div>
+          {/* Minimal Gallery Grid */}
+          <div className="grid grid-cols-12 gap-2 h-[600px]">
+             <div className="col-span-12 md:col-span-8 h-full rounded-[24px] overflow-hidden group relative">
+                <img src={gallery[0]} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+             </div>
+             <div className="hidden md:flex col-span-4 flex-col gap-2 h-full">
+                <div className="flex-1 rounded-[24px] overflow-hidden">
+                   <img src={gallery[1] || gallery[0]} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                </div>
+                <div className="flex-1 rounded-[24px] overflow-hidden">
+                   <img src={gallery[2] || gallery[0]} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                </div>
+             </div>
+          </div>
 
-              {/* Nearby Education & Schools */}
-              <div className="flex flex-col gap-8">
-                 <h2 className="text-[22px] font-bold text-[#1A1A1A] flex items-center gap-3">
-                    <GraduationCap size={24} className="text-brand" /> Education & Proximity
-                 </h2>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { name: 'Elite International School', dist: '0.8 km', rating: '9.4' },
-                      { name: 'Modern Science Academy', dist: '1.2 km', rating: '9.1' },
-                      { name: 'Greenwood Primary', dist: '2.4 km', rating: '8.8' },
-                      { name: 'Westside High', dist: '3.1 km', rating: '9.0' }
-                    ].map((school, i) => (
-                       <div key={i} className="p-6 bg-white border border-gray-100 rounded-2xl flex justify-between items-center hover:border-brand/30 hover:shadow-lg hover:shadow-gray-100 transition-all cursor-default">
-                          <div className="flex flex-col">
-                             <span className="text-[15px] font-bold text-[#1A1A1A]">{school.name}</span>
-                             <span className="text-[12px] text-gray-400 font-medium flex items-center gap-1"><MapPin size={10} /> {school.dist}</span>
-                          </div>
-                          <div className="bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full text-[11px] font-black">{school.rating}</div>
-                       </div>
-                    ))}
-                 </div>
-              </div>
+          {/* Minimal Spec Line */}
+          <div className="flex flex-wrap items-center gap-x-16 gap-y-6 py-8 border-b border-gray-100">
+             {[
+               { icon: Bed, label: 'Suites', val: property.bedrooms },
+               { icon: Bath, label: 'Bathrooms', val: property.bathrooms },
+               { icon: Maximize2, label: 'Square Ft', val: property.totalArea },
+               { icon: Calendar, label: 'Year Built', val: property.yearBuilt || 2024 },
+               { icon: TrendingUp, label: 'ROI', val: `${property.estimatedROI || '8.5'}%` }
+             ].map((spec, i) => (
+                <div key={i} className="flex items-center gap-4">
+                   <spec.icon size={18} strokeWidth={1} className="text-gray-400" />
+                   <div className="flex flex-col">
+                      <span className="text-[13px] font-medium uppercase tracking-widest">{spec.val}</span>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{spec.label}</span>
+                   </div>
+                </div>
+             ))}
+          </div>
 
-              {/* Amenities Grid */}
-              <div className="flex flex-col gap-8">
-                 <h2 className="text-[22px] font-bold text-[#1A1A1A]">Curated Amenities</h2>
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[...(property.internalAmenities?.split(',') || []), ...(property.externalAmenities?.split(',') || [])].map((amenity, i) => (
-                       <div key={i} className="p-5 border border-gray-50 rounded-2xl flex items-center gap-3 text-[14px] text-gray-600 font-medium hover:bg-gray-50 transition-all">
-                          <CheckCircle2 size={16} className="text-brand" /> {amenity}
-                       </div>
-                    ))}
-                 </div>
-              </div>
+          {/* Content Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 pt-12">
+             
+             {/* Description & Narrative */}
+             <div className="lg:col-span-7 flex flex-col gap-16">
+                <div className="flex flex-col gap-8">
+                   <h2 className="text-[12px] font-bold uppercase tracking-[0.5em] text-gray-400">The Description</h2>
+                   <p className="text-[18px] font-light leading-relaxed text-gray-600 max-w-2xl">
+                      {property.description || "A clean expression of modern architecture. This residence emphasizes openness, natural light, and a seamless connection between internal and external spaces. Every detail has been curated to provide a calm, minimalist sanctuary."}
+                   </p>
+                </div>
 
-           </div>
+                <div className="flex flex-col gap-8">
+                   <h2 className="text-[12px] font-bold uppercase tracking-[0.5em] text-gray-400">Features</h2>
+                   <div className="grid grid-cols-2 gap-y-4 gap-x-12">
+                      {[...(property.internalAmenities?.split(',') || []), ...(property.externalAmenities?.split(',') || [])].slice(0, 8).map((item, i) => (
+                         <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 group hover:border-brand transition-all">
+                            <span className="text-[14px] font-light text-gray-500 group-hover:text-black">{item}</span>
+                            <div className="w-1 h-1 bg-gray-200 rounded-full group-hover:bg-brand" />
+                         </div>
+                      ))}
+                   </div>
+                </div>
 
-           {/* Right Column: Inquiry Form */}
-           <div className="lg:col-span-4">
-              <div className="sticky top-28 flex flex-col gap-8">
-                 
-                 {/* Main Action Card */}
-                 <div className="bg-white border border-gray-100 p-10 rounded-[40px] shadow-2xl shadow-gray-100/50 flex flex-col gap-10">
-                    <div className="flex items-center gap-5 pb-8 border-b border-gray-100">
-                       <img src={property.owner?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"} className="w-20 h-20 rounded-3xl object-cover" alt="Agent" />
-                       <div className="flex flex-col">
-                          <h3 className="text-[20px] font-bold text-[#1A1A1A]">{property.owner?.name || "Daniel Morgan"}</h3>
-                          <span className="text-[12px] text-brand font-black uppercase tracking-widest">Senior Partner</span>
-                       </div>
-                    </div>
+                <div className="flex flex-col gap-8">
+                   <h2 className="text-[12px] font-bold uppercase tracking-[0.5em] text-gray-400">Proximity Matrix</h2>
+                   <div className="flex flex-col gap-2">
+                      {[
+                        { name: 'Elite Academy', type: 'Education', dist: '0.8km' },
+                        { name: 'City Central Station', type: 'Transport', dist: '1.2km' },
+                        { name: 'Royal Health Care', type: 'Health', dist: '2.5km' }
+                      ].map((loc, i) => (
+                         <div key={i} className="flex items-center justify-between p-6 rounded-2xl hover:bg-gray-50 transition-all cursor-default">
+                            <div className="flex items-center gap-6">
+                               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300">0{i+1}</span>
+                               <div className="flex flex-col">
+                                  <span className="text-[15px] font-medium">{loc.name}</span>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{loc.type}</span>
+                               </div>
+                            </div>
+                            <span className="text-[12px] font-light text-gray-400">{loc.dist}</span>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
 
-                    <div className="flex flex-col gap-6">
-                       <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Your Full Name</label>
-                          <input type="text" placeholder="Johnathan Miller" className="w-full px-6 h-14 bg-gray-50 border border-transparent rounded-2xl focus:border-brand/30 outline-none transition-all text-[14px] font-medium" />
-                       </div>
-                       <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
-                          <input type="email" placeholder="john@address.com" className="w-full px-6 h-14 bg-gray-50 border border-transparent rounded-2xl focus:border-brand/30 outline-none transition-all text-[14px] font-medium" />
-                       </div>
-                       <button className="w-full h-18 bg-[#1A1A1A] text-white font-bold rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-4 py-5 shadow-xl shadow-black/10">
-                          Initialize Protocol <ArrowUpRight size={22} />
-                       </button>
-                       <div className="flex gap-2">
-                          <button className="flex-1 h-14 border border-gray-100 rounded-2xl text-[12px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
-                             <Phone size={14} /> Call Agent
-                          </button>
-                          <button className="flex-1 h-14 border border-gray-100 rounded-2xl text-[12px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
-                             <Mail size={14} /> Email Office
-                          </button>
-                       </div>
-                    </div>
-                 </div>
+             {/* Right Sidebar - Slick Action */}
+             <div className="lg:col-span-5">
+                <div className="sticky top-32 flex flex-col gap-12">
+                   <div className="flex flex-col gap-10 p-12 border border-gray-100 rounded-[32px] hover:border-gray-200 transition-all">
+                      <div className="flex flex-col gap-2">
+                         <h3 className="text-[24px] font-light uppercase tracking-widest">Inquiry</h3>
+                         <p className="text-[12px] font-light text-gray-400">Start the acquisition process by submitting your interest.</p>
+                      </div>
+                      
+                      <div className="flex flex-col gap-6">
+                         <div className="flex flex-col gap-1">
+                            <input type="text" placeholder="Identity" className="w-full py-4 border-b border-gray-100 outline-none focus:border-brand transition-all text-[14px] font-light" />
+                         </div>
+                         <div className="flex flex-col gap-1">
+                            <input type="email" placeholder="Communication" className="w-full py-4 border-b border-gray-100 outline-none focus:border-brand transition-all text-[14px] font-light" />
+                         </div>
+                         
+                         <motion.button 
+                           whileTap={{ scale: 0.98 }}
+                           className="w-full mt-6 py-6 bg-black text-white text-[12px] font-bold uppercase tracking-[0.4em] rounded-xl hover:bg-brand transition-all duration-500"
+                         >
+                            Initialize Request
+                         </motion.button>
 
-                 {/* Asset Downloads */}
-                 <div className="flex flex-col gap-4">
-                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] ml-4">Documentation</h4>
-                    <div className="flex flex-col gap-3">
-                       <button className="flex items-center justify-between p-6 bg-gray-50 rounded-[28px] hover:bg-gray-100 transition-all group">
-                          <div className="flex items-center gap-4">
-                             <FileText className="text-brand" size={20} />
-                             <span className="text-[14px] font-bold">Property Brochure</span>
-                          </div>
-                          <ArrowUpRight size={18} className="text-gray-300 group-hover:text-brand" />
-                       </button>
-                       <button className="flex items-center justify-between p-6 bg-gray-50 rounded-[28px] hover:bg-gray-100 transition-all group">
-                          <div className="flex items-center gap-4">
-                             <Home className="text-brand" size={20} />
-                             <span className="text-[14px] font-bold">Full Floorplans (PDF)</span>
-                          </div>
-                          <ArrowUpRight size={18} className="text-gray-300 group-hover:text-brand" />
-                       </button>
-                    </div>
-                 </div>
+                         <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-4">
+                            <div className="flex items-center gap-2 cursor-pointer hover:text-black transition-all">
+                               <Share2 size={12} /> Share Asset
+                            </div>
+                            <div className="flex items-center gap-2 cursor-pointer hover:text-red-500 transition-all">
+                               <Heart size={12} /> Save for Later
+                            </div>
+                         </div>
+                      </div>
+                   </div>
 
-              </div>
-           </div>
+                   {/* Legal / Data Note */}
+                   <div className="px-8 flex gap-4">
+                      <Info size={16} className="text-gray-300 mt-1" />
+                      <p className="text-[11px] font-light text-gray-400 leading-relaxed">
+                         All transactions are encrypted and verified. By initiating a request, you agree to our digital protocol and data handling standards.
+                      </p>
+                   </div>
+                </div>
+             </div>
+
+          </div>
 
         </div>
       </main>
@@ -333,4 +219,4 @@ const PropertyDetails = () => {
   );
 };
 
-export default PropertyDetails;
+export default SimpleSlick;
