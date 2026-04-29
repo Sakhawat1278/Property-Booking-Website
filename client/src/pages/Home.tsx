@@ -51,10 +51,10 @@ const Home = () => {
       <Navbar />
       
       {/* Main Hero Container - Uniform 8px Frame */}
-      <main className="pt-[72px] md:pt-[88px] px-2 flex flex-col gap-2">
+      <main className="pt-[72px] md:pt-[88px] px-2 pb-2 flex flex-col gap-2">
         {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
-          <section className="relative h-[75vh] md:h-[calc(100vh-96px)] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
+          <section className="relative h-[calc(100dvh-72px)] md:h-[calc(100dvh-88px)] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
             {/* Background Video with Image Fallback */}
             <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <img 
@@ -74,7 +74,7 @@ const Home = () => {
             </div>
 
               {/* Hero Content */}
-              <div className="relative z-10 max-w-4xl">
+              <div className="relative z-10 max-w-4xl pb-[300px] sm:pb-[260px] md:pb-28">
                 <motion.h1 
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}

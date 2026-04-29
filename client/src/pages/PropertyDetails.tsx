@@ -194,21 +194,21 @@ const PropertyDetails = () => {
       
       <main className="pt-[80px] pb-8">
         {/* 1. TOP UTILITY BAR (Sticky Navigation & Actions) */}
-        <div className="sticky top-[80px] z-40 bg-white/80 backdrop-blur-md px-8 py-3 grid grid-cols-3 items-center transition-all duration-300">
+        <div className="sticky top-[64px] md:top-[80px] z-40 bg-white/80 backdrop-blur-md px-4 md:px-8 py-3 flex items-center justify-between md:grid md:grid-cols-3 transition-all duration-300 border-b border-gray-100/50">
           {/* Left: Go Back */}
           <div className="flex justify-start">
             <button 
               onClick={() => navigate(-1)}
-              className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.15em] hover:text-brand transition-colors group"
+              className="flex items-center gap-2 md:gap-3 text-[11px] font-bold uppercase tracking-[0.15em] hover:text-brand transition-colors group"
             >
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white group-hover:bg-brand transition-all duration-300 shadow-sm">
                 <ChevronLeft size={16} strokeWidth={2.5} />
               </div>
-              <span>Go Back</span>
+              <span className="hidden sm:inline">Go Back</span>
             </button>
           </div>
           
-          {/* Center: Location & Rating Info */}
+          {/* Center: Location & Rating Info — md+ only */}
           <div className="hidden md:flex items-center justify-center gap-8">
             <div className="flex items-center gap-2">
               <Star size={14} className="text-brand fill-brand" />
@@ -223,15 +223,16 @@ const PropertyDetails = () => {
             </div>
           </div>
 
-          {/* Right: Quick Actions (Share & Wishlist) */}
-          <div className="flex items-center justify-end gap-3">
-            <button className="flex items-center gap-2 px-5 py-2 rounded-full bg-black/5 hover:bg-black text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border border-transparent hover:border-black shadow-sm group">
+          {/* Right: Quick Actions */}
+          <div className="flex items-center justify-end gap-2">
+            {/* Mobile: icon only */}
+            <button className="flex items-center justify-center gap-2 w-9 h-9 md:w-auto md:h-auto md:px-5 md:py-2 rounded-full bg-black/5 hover:bg-black text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border border-transparent hover:border-black shadow-sm group">
               <Share2 size={14} className="transition-transform group-hover:scale-110" />
-              <span>Share</span>
+              <span className="hidden md:inline">Share</span>
             </button>
-            <button className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-brand border border-gray-200 hover:border-brand text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all duration-300 shadow-sm group">
+            <button className="flex items-center justify-center gap-2 w-9 h-9 md:w-auto md:h-auto md:px-5 md:py-2 rounded-full bg-white hover:bg-brand border border-gray-200 hover:border-brand text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all duration-300 shadow-sm group">
               <Heart size={14} className="transition-all group-hover:fill-white group-hover:scale-110" />
-              <span>Save</span>
+              <span className="hidden md:inline">Save</span>
             </button>
           </div>
         </div>
