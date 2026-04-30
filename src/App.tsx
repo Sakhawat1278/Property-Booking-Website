@@ -10,10 +10,12 @@ import AdminBookings from './pages/admin/AdminBookings';
 import AdminRoute from './components/AdminRoute';
 
 import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster richColors position="top-right" />
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'sonner';
 
 // Inline SVG Components for compatibility
 const IconArrowLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
@@ -30,7 +31,6 @@ const Login = () => {
   const [licenseNumber, setLicenseNumber] = useState('');
   const [website, setWebsite] = useState('');
   const [experience, setExperience] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { login: authLogin } = useAuth();
@@ -43,7 +43,6 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     
     // Simulate API delay
@@ -55,16 +54,20 @@ const Login = () => {
             user: { id: 'admin-001', email, name: 'Admin', role: 'ADMIN' },
             token: 'admin-token-' + Date.now()
           });
+          toast.success('Welcome back, Admin!');
           navigate('/admin');
-        } else {
+        } else if (email !== ADMIN_EMAIL && email.includes('@')) {
           authLogin({
             user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
             token: 'mock-token-' + Date.now()
           });
+          toast.success('Login successful!');
           navigate('/');
+        } else {
+          toast.error('Invalid email or password');
         }
       } else {
-        setError('Invalid credentials');
+        toast.error('Please enter both email and password');
       }
       setLoading(false);
     }, 1000);
@@ -72,7 +75,6 @@ const Login = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     setTimeout(() => {
@@ -80,6 +82,7 @@ const Login = () => {
         user: { id: Date.now().toString(), email, name, role },
         token: 'mock-token-' + Date.now()
       });
+      toast.success('Account created successfully!');
       navigate('/');
       setLoading(false);
     }, 1000);
@@ -159,11 +162,7 @@ const Login = () => {
                   <p className="text-gray-400 text-[13px]">Access your account</p>
                 </div>
 
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-500 text-[12px] font-medium animate-shake">
-                    {error}
-                  </div>
-                )}
+
 
                 <form className="space-y-3" onSubmit={handleLogin}>
                   <div className="relative">
@@ -239,11 +238,7 @@ const Login = () => {
                   <p className="text-gray-400 text-[13px]">Join Nestory today</p>
                 </div>
 
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-500 text-[12px] font-medium">
-                    {error}
-                  </div>
-                )}
+
 
                 <div className="mb-6">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1 text-center">Account Type</label>
@@ -436,7 +431,7 @@ const Login = () => {
                   <p className="text-gray-400 text-[13px]">Enter your email for the link</p>
                 </div>
 
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); toast.info('Password reset link sent to your email.'); setMode('login'); }}>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
                       <IconMail />
