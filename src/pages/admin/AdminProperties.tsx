@@ -2,18 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, MapPin, Bed, Bath, Star, Edit3, Trash2,
-  ToggleLeft, ToggleRight, X, Save, AlertTriangle, ChevronDown
+  ToggleLeft, ToggleRight, ChevronDown, Plus
 } from 'lucide-react';
 import { properties as allProperties } from '../../data/properties';
 import { useModalStore } from '../../store/useModalStore';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-/* ─────────────────────── helpers ─────────────────────── */
-const statusColors: Record<string, string> = {
-  FOR_SALE: 'bg-blue-50 text-blue-500 border-blue-100',
-  FOR_RENT: 'bg-green-50 text-green-500 border-green-100',
-  OFF_PLAN: 'bg-purple-50 text-purple-500 border-purple-100',
-};
 const statusLabels: Record<string, string> = {
   FOR_SALE: 'For Sale',
   FOR_RENT: 'For Rent',
@@ -21,368 +16,199 @@ const statusLabels: Record<string, string> = {
 };
 type Property = (typeof allProperties)[0];
 
-
-
-/* ─────────────────────── Edit Slide Panel ─────────────────────── */
-const EditPanel: React.FC<{
-  property: Property;
-  onClose: () => void;
-  onSave: (updated: Property) => void;
-}> = ({ property, onClose, onSave }) => {
-  const [form, setForm] = useState({ ...property });
-  const set = (field: string, value: string | number | boolean) =>
-    setForm(prev => ({ ...prev, [field]: value }));
-
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-black/40 z-40"
-      />
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'spring', damping: 28 }}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white z-50 flex flex-col shadow-2xl"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-          <div>
-            <h2 className="text-[16px] font-bold text-[#1A1A1A]">Edit Property</h2>
-            <p className="text-[11px] text-gray-400 mt-0.5 truncate max-w-[260px]">{property.title}</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Property Image Preview */}
-          <div className="relative h-40 rounded-2xl overflow-hidden bg-gray-100">
-            <img src={form.primaryImage} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute bottom-3 left-3 text-white text-[11px] font-bold bg-black/40 px-3 py-1 rounded-full">
-              Cover Image
-            </div>
-          </div>
-
-          {/* Title */}
-          <Field label="Title">
-            <input
-              value={form.title}
-              onChange={e => set('title', e.target.value)}
-              className="input-edit"
-              placeholder="Property title"
-            />
-          </Field>
-
-          {/* Description */}
-          <Field label="Description">
-            <textarea
-              value={form.description || ''}
-              onChange={e => set('description', e.target.value)}
-              rows={4}
-              className="input-edit resize-none"
-              placeholder="Property description"
-            />
-          </Field>
-
-          {/* Price & Currency */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Price">
-              <input
-                type="number"
-                value={form.price}
-                onChange={e => set('price', Number(e.target.value))}
-                className="input-edit"
-              />
-            </Field>
-            <Field label="Currency">
-              <select value={form.currency} onChange={e => set('currency', e.target.value)} className="input-edit">
-                <option value="USD">USD $</option>
-                <option value="EUR">EUR €</option>
-                <option value="GBP">GBP £</option>
-                <option value="AED">AED د.إ</option>
-                <option value="SGD">SGD S$</option>
-                <option value="AUD">AUD A$</option>
-              </select>
-            </Field>
-          </div>
-
-          {/* Status & Category */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Listing Status">
-              <select value={form.status} onChange={e => set('status', e.target.value)} className="input-edit">
-                <option value="FOR_SALE">For Sale</option>
-                <option value="FOR_RENT">For Rent</option>
-                <option value="OFF_PLAN">Off Plan</option>
-              </select>
-            </Field>
-            <Field label="Category">
-              <select value={form.category} onChange={e => set('category', e.target.value)} className="input-edit">
-                <option value="RESIDENTIAL">Residential</option>
-                <option value="COMMERCIAL">Commercial</option>
-                <option value="LUXURY">Luxury</option>
-                <option value="VACATION">Vacation</option>
-              </select>
-            </Field>
-          </div>
-
-          {/* Location */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="City">
-              <input value={form.city} onChange={e => set('city', e.target.value)} className="input-edit" />
-            </Field>
-            <Field label="Country">
-              <input value={form.country || ''} onChange={e => set('country', e.target.value)} className="input-edit" />
-            </Field>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Bedrooms">
-              <input type="number" value={form.bedrooms} onChange={e => set('bedrooms', Number(e.target.value))} className="input-edit" />
-            </Field>
-            <Field label="Bathrooms">
-              <input type="number" value={form.bathrooms} onChange={e => set('bathrooms', Number(e.target.value))} className="input-edit" />
-            </Field>
-            <Field label="Area (sqft)">
-              <input type="number" value={form.totalArea} onChange={e => set('totalArea', Number(e.target.value))} className="input-edit" />
-            </Field>
-          </div>
-
-          {/* Verified Toggle */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-            <div>
-              <p className="text-[13px] font-semibold text-[#1A1A1A]">Verified Listing</p>
-              <p className="text-[11px] text-gray-400">Mark as verified on the platform</p>
-            </div>
-            <button
-              onClick={() => set('isVerified', !form.isVerified)}
-              className={`w-12 h-6 rounded-full p-0.5 transition-colors duration-300 ${form.isVerified ? 'bg-brand' : 'bg-gray-200'}`}
-            >
-              <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${form.isVerified ? 'translate-x-6' : 'translate-x-0'}`} />
-            </button>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 h-11 rounded-2xl border border-gray-200 text-[13px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Discard
-          </button>
-          <button
-            onClick={() => onSave(form)}
-            className="flex-1 h-11 rounded-2xl bg-[#1A1A1A] text-white text-[13px] font-semibold flex items-center justify-center gap-2 hover:bg-brand transition-colors"
-          >
-            <Save size={14} /> Save Changes
-          </button>
-        </div>
-      </motion.div>
-    </>
-  );
-};
-
-/* tiny reusable field wrapper */
-const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div>
-    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">{label}</label>
-    {children}
-  </div>
-);
-
-/* ─────────────────────── Main Page ─────────────────────── */
 const AdminProperties: React.FC = () => {
-  const [propertyList, setPropertyList] = useState([...allProperties]);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
-  const [verifiedStates, setVerifiedStates] = useState<Record<string, boolean>>(
-    Object.fromEntries(allProperties.map(p => [p.id, p.isVerified]))
-  );
-  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [properties, setProperties] = useState<Property[]>(allProperties);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
 
-  const categories = ['ALL', 'RESIDENTIAL', 'COMMERCIAL', 'LUXURY', 'VACATION'];
-
-  const filtered = propertyList.filter(p => {
-    const matchesSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.city.toLowerCase().includes(search.toLowerCase()) ||
-      (p.country || '').toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === 'ALL' || p.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+  // Filter
+  const filtered = properties.filter(p => {
+    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          p.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  const handleSave = (updated: Property) => {
-    setPropertyList(prev => prev.map(p => (p.id === updated.id ? updated : p)));
-    setVerifiedStates(prev => ({ ...prev, [updated.id]: updated.isVerified }));
-    setEditingProperty(null);
-  };
-
-  const confirmDelete = (property: Property) => {
+  const handleDelete = (id: string, title: string) => {
     openModal({
       title: 'Delete Property',
-      description: `Are you sure you want to delete "${property.title}"? This action cannot be undone.`,
-      confirmText: 'Delete',
+      description: `Are you sure you want to permanently delete "${title}"? This action cannot be undone.`,
+      confirmText: 'Delete Property',
       danger: true,
       onConfirm: () => {
-        setPropertyList(prev => prev.filter(p => p.id !== property.id));
+        setProperties(prev => prev.filter(p => p.id !== id));
         toast.success('Property deleted successfully');
       }
     });
   };
 
-  const toggleVerified = (id: string) => {
-    setVerifiedStates(prev => ({ ...prev, [id]: !prev[id] }));
-    setPropertyList(prev =>
-      prev.map(p => (p.id === id ? { ...p, isVerified: !p.isVerified } : p))
-    );
+  const toggleVerification = (id: string, current: boolean) => {
+    setProperties(prev => prev.map(p => p.id === id ? { ...p, isVerified: !current } : p));
+    toast.success(current ? 'Property unverified' : 'Property verified');
   };
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+    <div className="space-y-6">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[22px] md:text-[24px] font-bold text-[#1A1A1A]">Properties</h1>
-          <p className="text-[13px] text-gray-400 mt-1">{propertyList.length} total listings on the platform.</p>
+          <h1 className="text-[24px] font-bold text-[#1A1A1A]">Property Management</h1>
+          <p className="text-[13px] text-gray-400 mt-1">Manage your listings, edit details, and track performance.</p>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by title, city or country..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-white border border-gray-200 rounded-full text-[13px] focus:outline-none focus:border-[#1A1A1A] transition-colors"
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {categories.map(c => (
-            <button
-              key={c}
-              onClick={() => setCategoryFilter(c)}
-              className={`px-3 h-10 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
-                categoryFilter === c
-                  ? 'bg-[#1A1A1A] text-white'
-                  : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-300'
-              }`}
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search properties..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-11 bg-white border border-gray-200 rounded-full pl-11 pr-4 text-[13px] focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/5 transition-all"
+            />
+          </div>
+
+          {/* Filter */}
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-auto h-11 bg-white border border-gray-200 rounded-full pl-5 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-brand transition-colors cursor-pointer"
             >
-              {c === 'ALL' ? 'All' : c.charAt(0) + c.slice(1).toLowerCase()}
-            </button>
-          ))}
+              <option value="ALL">All Status</option>
+              <option value="FOR_SALE">For Sale</option>
+              <option value="FOR_RENT">For Rent</option>
+              <option value="OFF_PLAN">Off Plan</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+
+          <button 
+            onClick={() => navigate('/admin/properties/new')}
+            className="w-full sm:w-auto h-11 bg-brand hover:bg-brand-dark text-white px-6 rounded-full items-center justify-center gap-2 text-[13px] font-bold transition-all shadow-[0_4px_12px_rgba(255,77,0,0.2)] hover:shadow-[0_4px_16px_rgba(255,77,0,0.3)] hover:-translate-y-0.5 flex"
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">Add Property</span>
+          </button>
         </div>
       </div>
 
-      <p className="text-[12px] text-gray-400">{filtered.length} properties</p>
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <AnimatePresence>
+          {filtered.map((p, i) => (
+            <motion.div
+              key={p.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2, delay: i * 0.05 }}
+              className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:border-gray-200 transition-colors flex flex-col"
+            >
+              {/* Image Header */}
+              <div className="relative h-48 overflow-hidden bg-gray-100 shrink-0">
+                <img src={p.primaryImage} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Status Badge */}
+                <div className="absolute top-4 left-4">
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border backdrop-blur-md ${
+                    p.status === 'FOR_SALE' ? 'bg-blue-500/20 text-blue-100 border-blue-400/30' :
+                    p.status === 'FOR_RENT' ? 'bg-green-500/20 text-green-100 border-green-400/30' :
+                    'bg-purple-500/20 text-purple-100 border-purple-400/30'
+                  }`}>
+                    {statusLabels[p.status]}
+                  </span>
+                </div>
 
-      {/* Property Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {filtered.map((property, i) => (
-          <motion.div
-            key={property.id}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-white rounded-2xl border border-gray-100 overflow-hidden group"
-          >
-            {/* Image */}
-            <div className="relative h-40 overflow-hidden">
-              <img
-                src={property.primaryImage}
-                alt={property.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
-              <span className={`absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColors[property.status]}`}>
-                {statusLabels[property.status]}
-              </span>
-
-              <button
-                onClick={() => toggleVerified(property.id)}
-                className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full text-[9px] font-bold transition-all hover:bg-white"
-              >
-                {verifiedStates[property.id] ? (
-                  <><ToggleRight size={12} className="text-green-500" /><span className="text-green-600">Verified</span></>
-                ) : (
-                  <><ToggleLeft size={12} className="text-gray-400" /><span className="text-gray-400">Unverified</span></>
-                )}
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="p-3">
-              <div className="flex items-start justify-between gap-1 mb-1">
-                <h3 className="text-[13px] font-bold text-[#1A1A1A] leading-tight line-clamp-1">{property.title}</h3>
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <Star size={10} className="text-amber-400 fill-amber-400" />
-                  <span className="text-[10px] font-bold text-gray-500">{property.rating}</span>
+                {/* Price */}
+                <div className="absolute bottom-4 left-4">
+                  <p className="text-white font-bold text-[20px] leading-none">
+                    ${p.price.toLocaleString()}
+                    {p.status === 'FOR_RENT' && <span className="text-[12px] font-medium text-white/70">/mo</span>}
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-gray-400 mb-2">
-                <MapPin size={10} />
-                <span className="text-[10px] truncate">{property.city}{property.country ? `, ${property.country}` : ''}</span>
-              </div>
+              {/* Content */}
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="text-[15px] font-bold text-[#1A1A1A] leading-tight line-clamp-1">{p.title}</h3>
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
+                    <Star size={12} className="fill-current" />
+                    {p.rating}
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-3 text-[10px] text-gray-400 mb-3">
-                {property.bedrooms > 0 && <span className="flex items-center gap-0.5"><Bed size={10} />{property.bedrooms}bd</span>}
-                <span className="flex items-center gap-0.5"><Bath size={10} />{property.bathrooms}ba</span>
-              </div>
+                <div className="flex items-center gap-1.5 text-gray-500 mb-4">
+                  <MapPin size={14} />
+                  <span className="text-[12px] font-medium truncate">{p.neighborhood}, {p.city}</span>
+                </div>
 
-              <p className="text-[15px] font-bold text-[#1A1A1A] mb-3">
-                {property.currency} {property.price.toLocaleString()}
-                {property.status === 'FOR_RENT' && <span className="text-[10px] font-normal text-gray-400">/mo</span>}
-              </p>
+                <div className="flex items-center gap-4 py-3 border-y border-gray-50 mb-auto">
+                  <div className="flex items-center gap-1.5 text-gray-600">
+                    <Bed size={16} className="text-gray-400" />
+                    <span className="text-[13px] font-semibold">{p.bedrooms}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-600">
+                    <Bath size={16} className="text-gray-400" />
+                    <span className="text-[13px] font-semibold">{p.bathrooms}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-600">
+                    <span className="text-[13px] font-semibold">{p.totalArea} <span className="text-[11px] text-gray-400 font-normal">sqft</span></span>
+                  </div>
+                </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setEditingProperty(property)}
-                  className="flex-1 h-8 bg-[#1A1A1A] text-white text-[11px] font-semibold rounded-full hover:bg-brand transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <Edit3 size={11} /> Edit
-                </button>
-                <button
-                  onClick={() => confirmDelete(property)}
-                  className="h-8 w-8 bg-red-50 border border-red-100 text-red-400 rounded-full hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors flex items-center justify-center"
-                >
-                  <Trash2 size={12} />
-                </button>
+                {/* Actions */}
+                <div className="flex items-center justify-between mt-4 pt-1">
+                  <button 
+                    onClick={() => toggleVerification(p.id, p.isVerified)}
+                    className="flex items-center gap-2 text-[12px] font-semibold text-gray-500 hover:text-[#1A1A1A] transition-colors"
+                  >
+                    {p.isVerified ? (
+                      <><ToggleRight size={20} className="text-brand" /> Verified</>
+                    ) : (
+                      <><ToggleLeft size={20} className="text-gray-300" /> Unverified</>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => navigate(`/admin/properties/edit/${p.id}`)}
+                      className="p-2 text-gray-400 hover:text-brand hover:bg-brand/5 rounded-lg transition-colors"
+                      title="Edit Property"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(p.id, p.title)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete Property"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {filtered.length === 0 && (
-        <div className="py-20 text-center text-gray-400 text-[13px]">No properties match your search.</div>
+        <div className="py-20 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <Search size={24} className="text-gray-300" />
+          </div>
+          <h3 className="text-[16px] font-bold text-[#1A1A1A] mb-1">No properties found</h3>
+          <p className="text-[13px] text-gray-400">Try adjusting your search or filters.</p>
+        </div>
       )}
-
-      {/* Edit Panel */}
-      <AnimatePresence>
-        {editingProperty && (
-          <EditPanel
-            property={editingProperty}
-            onClose={() => setEditingProperty(null)}
-            onSave={handleSave}
-          />
-        )}
-      </AnimatePresence>
-
     </div>
   );
 };
