@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Building2, Users, DollarSign, MessageSquare, 
-  ArrowRight, MoreHorizontal, Calendar, TrendingUp
+  ArrowRight, MoreHorizontal, Calendar, TrendingUp, Search
 } from 'lucide-react';
 
 const AdminOverview: React.FC = () => {
