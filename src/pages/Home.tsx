@@ -55,20 +55,12 @@ const Home = () => {
         {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
           <section className="relative h-[calc(100dvh-72px)] md:h-[calc(100dvh-88px)] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
-            {/* Background Video with Image Fallback */}
+            {/* Background Image */}
             <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <img 
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
-                className="w-full h-full object-cover opacity-40"
-                alt="Fallback"
-              />
-              <video
-                src="/hero-bg.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-100"
+                src="/hero-bg-modern.jpg" 
+                className="w-full h-full object-cover opacity-100"
+                alt="Modern building background"
               />
               <div className="absolute inset-0 bg-black/40" />
             </div>
