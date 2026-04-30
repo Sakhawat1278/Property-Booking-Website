@@ -5,7 +5,8 @@ import {
   ArrowLeft, Save, MapPin, Building2, Tag, 
   DollarSign, Activity, Image as ImageIcon, Home
 } from 'lucide-react';
-import { properties, Property } from '../../data/properties';
+import { properties } from '../../data/properties';
+import type { Property } from '../../data/properties';
 import { toast } from 'sonner';
 
 const defaultProperty: Partial<Property> = {
