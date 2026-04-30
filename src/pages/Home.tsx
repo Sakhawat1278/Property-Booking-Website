@@ -54,7 +54,7 @@ const Home = () => {
       <main className="pt-[72px] md:pt-[88px] px-2 pb-2 flex flex-col gap-2">
         {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
-          <section className="relative h-[calc(100dvh-72px)] md:h-[calc(100dvh-88px)] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
+          <section className="relative h-[calc(100dvh-80px)] md:h-[calc(100dvh-96px)] min-h-[650px] md:min-h-[700px] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
             {/* Background Image */}
             <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <img 
