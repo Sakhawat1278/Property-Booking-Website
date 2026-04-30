@@ -37,8 +37,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   // ── Hardcoded Admin Credentials ─────────────────────────────────────────
-  const ADMIN_EMAIL = 'admin@nestory.com';
-  const ADMIN_PASSWORD = 'Admin@1234';
+  const ADMIN_EMAIL = 'hshohan1278@gmail.com';
+  const ADMIN_PASSWORD = 'Sohclash123';
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleLogin = async (e: React.FormEvent) => {
