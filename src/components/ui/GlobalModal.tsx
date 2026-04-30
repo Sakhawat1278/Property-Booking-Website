@@ -62,14 +62,14 @@ const GlobalModal: React.FC = () => {
               <button
                 disabled={isProcessing}
                 onClick={closeModal}
-                className="flex-1 h-10 rounded-xl border border-gray-200 bg-white text-[13px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex-1 h-10 rounded-full border border-gray-200 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 {cancelText}
               </button>
               <button
                 disabled={isProcessing}
                 onClick={handleConfirm}
-                className={`flex-1 h-10 rounded-xl text-[13px] font-semibold text-white transition-colors flex items-center justify-center ${
+                className={`flex-1 h-10 rounded-full text-[13px] font-medium text-white transition-colors flex items-center justify-center ${
                   danger ? 'bg-red-500 hover:bg-red-600' : 'bg-[#1A1A1A] hover:bg-black'
                 } ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
