@@ -5,6 +5,8 @@ import {
   ToggleLeft, ToggleRight, X, Save, AlertTriangle, ChevronDown
 } from 'lucide-react';
 import { properties as allProperties } from '../../data/properties';
+import { useModalStore } from '../../store/useModalStore';
+import { toast } from 'sonner';
 
 /* ─────────────────────── helpers ─────────────────────── */
 const statusColors: Record<string, string> = {
@@ -19,62 +21,7 @@ const statusLabels: Record<string, string> = {
 };
 type Property = (typeof allProperties)[0];
 
-/* ─────────────────────── Delete Confirmation Modal ─────────────────────── */
-const DeleteModal: React.FC<{
-  property: Property;
-  onConfirm: () => void;
-  onCancel: () => void;
-}> = ({ property, onConfirm, onCancel }) => (
-  <AnimatePresence>
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
-      onClick={onCancel}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl"
-      >
-        {/* Icon */}
-        <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <AlertTriangle size={26} className="text-red-500" />
-        </div>
 
-        <h2 className="text-[18px] font-bold text-center text-[#1A1A1A] mb-2">Delete Property</h2>
-        <p className="text-[13px] text-gray-500 text-center leading-relaxed mb-2">
-          Are you sure you want to delete
-        </p>
-        <p className="text-[13px] font-bold text-[#1A1A1A] text-center mb-5 px-4 truncate">
-          "{property.title}"
-        </p>
-        <p className="text-[11px] text-red-400 text-center mb-6">
-          This action cannot be undone.
-        </p>
-
-        <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 h-11 rounded-2xl border border-gray-200 text-[13px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 h-11 rounded-2xl bg-red-500 text-white text-[13px] font-semibold hover:bg-red-600 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  </AnimatePresence>
-);
 
 /* ─────────────────────── Edit Slide Panel ─────────────────────── */
 const EditPanel: React.FC<{
@@ -261,7 +208,7 @@ const AdminProperties: React.FC = () => {
     Object.fromEntries(allProperties.map(p => [p.id, p.isVerified]))
   );
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-  const [deletingProperty, setDeletingProperty] = useState<Property | null>(null);
+  const { openModal } = useModalStore();
 
   const categories = ['ALL', 'RESIDENTIAL', 'COMMERCIAL', 'LUXURY', 'VACATION'];
 
@@ -280,10 +227,17 @@ const AdminProperties: React.FC = () => {
     setEditingProperty(null);
   };
 
-  const handleDelete = () => {
-    if (!deletingProperty) return;
-    setPropertyList(prev => prev.filter(p => p.id !== deletingProperty.id));
-    setDeletingProperty(null);
+  const confirmDelete = (property: Property) => {
+    openModal({
+      title: 'Delete Property',
+      description: `Are you sure you want to delete "${property.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true,
+      onConfirm: () => {
+        setPropertyList(prev => prev.filter(p => p.id !== property.id));
+        toast.success('Property deleted successfully');
+      }
+    });
   };
 
   const toggleVerified = (id: string) => {
@@ -403,7 +357,7 @@ const AdminProperties: React.FC = () => {
                   <Edit3 size={11} /> Edit
                 </button>
                 <button
-                  onClick={() => setDeletingProperty(property)}
+                  onClick={() => confirmDelete(property)}
                   className="h-8 w-8 bg-red-50 border border-red-100 text-red-400 rounded-full hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors flex items-center justify-center"
                 >
                   <Trash2 size={12} />
@@ -429,16 +383,6 @@ const AdminProperties: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Delete Confirmation */}
-      <AnimatePresence>
-        {deletingProperty && (
-          <DeleteModal
-            property={deletingProperty}
-            onConfirm={handleDelete}
-            onCancel={() => setDeletingProperty(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };

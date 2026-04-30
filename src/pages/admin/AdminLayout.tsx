@@ -7,6 +7,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useModalStore } from '../../store/useModalStore';
+
 const navItems = [
   { to: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} />, end: true },
   { to: '/admin/properties', label: 'Properties', icon: <Building2 size={18} /> },
@@ -18,10 +20,19 @@ const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { openModal } = useModalStore();
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    openModal({
+      title: 'Sign Out',
+      description: 'Are you sure you want to securely log out of the admin console?',
+      confirmText: 'Sign Out',
+      danger: true,
+      onConfirm: () => {
+        logout();
+        navigate('/login');
+      }
+    });
   };
 
   const Sidebar = () => (

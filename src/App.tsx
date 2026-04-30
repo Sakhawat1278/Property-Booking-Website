@@ -11,6 +11,7 @@ import AdminRoute from './components/AdminRoute';
 
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'sonner';
+import GlobalModal from './components/ui/GlobalModal';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           }
         }} 
       />
+      <GlobalModal />
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
