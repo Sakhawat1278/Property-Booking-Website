@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, CalendarCheck, Users, 
-  LogOut, Menu, X, Shield, Search, Bell, MessageSquare, Plus
+  LogOut, Menu, X, Shield, Search, Bell, MessageSquare, Plus, Home
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -170,6 +170,11 @@ const AdminLayout: React.FC = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link to="/">
+              <button title="Back to Website" className="hidden sm:flex w-10 h-10 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-brand transition-colors">
+                <Home size={16} />
+              </button>
+            </Link>
             <button className="hidden sm:flex w-10 h-10 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
               <MessageSquare size={16} />
             </button>
