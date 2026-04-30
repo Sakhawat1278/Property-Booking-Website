@@ -83,6 +83,7 @@ export const properties: Property[] = [
       '/luxury_pool_backyard_1_1777409273870.png'
     ],
     description: 'A sophisticated industrial-style loft in the heart of the Financial District. Features 14-foot ceilings, original exposed brick, and state-of-the-art smart home integration. This expansive residence offers a rare combination of historical character and modern luxury, with oversized windows that flood the space with natural light. The open-concept living area is perfect for entertaining, while the gourmet kitchen features premium Gaggenau appliances and a custom marble island. Every detail has been meticulously curated for the discerning urban professional.', // Design Rule: 75-90 words for visual consistency
+    internalAmenities: 'High Ceilings,Smart Home,Exposed Brick',
     externalAmenities: 'Rooftop Access',
     isVerified: true,
     rating: 4.8,
