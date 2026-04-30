@@ -15,7 +15,12 @@ import { Toaster } from 'sonner';
 function App() {
   return (
     <AuthProvider>
-      <Toaster richColors position="top-right" />
+      <Toaster 
+        position="top-center" 
+        toastOptions={{
+          className: '!bg-white/80 !backdrop-blur-xl !border !border-white/50 !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !text-[13px] !font-medium !text-[#1A1A1A] !rounded-full !px-5 !py-3',
+        }} 
+      />
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
