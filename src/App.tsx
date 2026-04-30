@@ -16,9 +16,12 @@ function App() {
   return (
     <AuthProvider>
       <Toaster 
-        position="top-center" 
+        position="bottom-right" 
         toastOptions={{
-          className: '!bg-white/80 !backdrop-blur-xl !border !border-white/50 !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !text-[13px] !font-medium !text-[#1A1A1A] !rounded-full !px-5 !py-3',
+          classNames: {
+            toast: '!bg-white/80 !backdrop-blur-xl !border !border-white/50 !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !text-[13px] !font-medium !text-[#1A1A1A] !rounded-full !px-5 !py-3',
+            icon: '!text-[#FF4D00]',
+          }
         }} 
       />
       <Router>
