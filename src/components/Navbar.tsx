@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ArrowUpRight, Menu, X } from 'lucide-react';
+import { ChevronDown, ArrowUpRight, Menu, X, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { label: 'Properties', path: '/properties' },
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <>
@@ -61,30 +63,54 @@ const Navbar = () => {
 
         {/* Desktop CTA */}
         <div className="hidden lg:block pointer-events-auto">
-          <Link to="/login">
-            <motion.button
-              whileHover="hover"
-              className="group relative flex items-center gap-4 bg-brand text-white pl-6 pr-1 h-10 rounded-full overflow-hidden"
-            >
-              <span className="text-[14px] font-normal">Sign in</span>
-              <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45">
-                <ArrowUpRight size={16} strokeWidth={2} />
-              </div>
-              <motion.div
-                variants={{ hover: { x: '100%' } }}
-                initial={{ x: '-100%' }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-              />
-            </motion.button>
-          </Link>
+          {user ? (
+            <Link to="/admin">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative flex items-center gap-3 bg-gray-50 text-[#1A1A1A] pl-1 pr-6 h-10 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-all overflow-hidden"
+              >
+                <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[13px] shrink-0">
+                  {user.name?.charAt(0).toUpperCase() || 'A'}
+                </div>
+                <span className="text-[14px] font-medium truncate max-w-[100px]">{user.name}</span>
+              </motion.button>
+            </Link>
+          ) : (
+            <Link to="/login">
+              <motion.button
+                whileHover="hover"
+                className="group relative flex items-center gap-4 bg-brand text-white pl-6 pr-1 h-10 rounded-full overflow-hidden"
+              >
+                <span className="text-[14px] font-normal">Sign in</span>
+                <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45">
+                  <ArrowUpRight size={16} strokeWidth={2} />
+                </div>
+                <motion.div
+                  variants={{ hover: { x: '100%' } }}
+                  initial={{ x: '-100%' }}
+                  transition={{ duration: 0.6, ease: 'easeInOut' }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                />
+              </motion.button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile: Sign in + Hamburger */}
         <div className="flex items-center gap-2 lg:hidden">
-          <Link to="/login" className="h-9 px-4 bg-brand text-white text-[13px] font-medium rounded-full flex items-center">
-            Sign in
-          </Link>
+          {user ? (
+            <Link to="/admin" className="h-9 pl-1 pr-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-[#1A1A1A] rounded-full flex items-center gap-2 transition-colors">
+               <div className="w-7 h-7 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[12px] shrink-0">
+                  {user.name?.charAt(0).toUpperCase() || 'A'}
+                </div>
+                <span className="text-[13px] font-medium truncate max-w-[80px]">{user.name?.split(' ')[0]}</span>
+            </Link>
+          ) : (
+            <Link to="/login" className="h-9 px-4 bg-brand text-white text-[13px] font-medium rounded-full flex items-center">
+              Sign in
+            </Link>
+          )}
           <button
             onClick={() => setMobileOpen(true)}
             className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -131,11 +157,22 @@ const Navbar = () => {
                 ))}
               </nav>
               <div className="p-4 border-t border-gray-100">
-                <Link to="/login" onClick={() => setMobileOpen(false)}>
-                  <button className="w-full h-11 bg-brand text-white rounded-full text-[14px] font-medium">
-                    Sign In
-                  </button>
-                </Link>
+                {user ? (
+                  <Link to="/admin" onClick={() => setMobileOpen(false)}>
+                    <button className="w-full h-11 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-[#1A1A1A] rounded-full text-[14px] font-medium flex items-center justify-center gap-2 transition-colors">
+                       <div className="w-7 h-7 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[12px]">
+                          {user.name?.charAt(0).toUpperCase() || 'A'}
+                       </div>
+                       Go to Dashboard
+                    </button>
+                  </Link>
+                ) : (
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
+                    <button className="w-full h-11 bg-brand text-white rounded-full text-[14px] font-medium">
+                      Sign In
+                    </button>
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>
