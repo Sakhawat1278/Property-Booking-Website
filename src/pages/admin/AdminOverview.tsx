@@ -201,9 +201,9 @@ const AdminOverview: React.FC = () => {
           </div>
           
           {/* CSS Bar Chart */}
-          <div className="p-6 flex-1 flex flex-col">
-            {/* Y-axis labels */}
-            <div className="flex-1 relative min-h-[240px]">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col overflow-x-auto">
+            <div className="flex-1 relative min-h-[240px] min-w-[500px]">
+              {/* Y-axis labels */}
               <div className="absolute inset-0 flex flex-col justify-between text-[10px] font-bold text-gray-400 pb-10 z-0">
                 <div className="w-full flex items-center gap-4"><span className="w-8 text-right">2000</span><div className="flex-1 h-px bg-gray-50" /></div>
                 <div className="w-full flex items-center gap-4"><span className="w-8 text-right">1500</span><div className="flex-1 h-px bg-gray-50" /></div>
@@ -221,7 +221,7 @@ const AdminOverview: React.FC = () => {
                       <div className="absolute -inset-x-2 -inset-y-3 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-gray-50 rounded-2xl -z-10 pointer-events-none" />
                     )}
                     
-                    <div className="w-10 rounded-t-xl transition-all duration-500 overflow-hidden relative mt-auto" style={{ height: `${d.val1}%` }}>
+                    <div className="w-8 sm:w-10 rounded-t-xl transition-all duration-500 overflow-hidden relative mt-auto" style={{ height: `${d.val1}%` }}>
                        <div className={`absolute inset-0 ${d.active ? 'bg-brand' : 'bg-brand/10 group-hover:bg-brand/20'}`} />
                     </div>
                   </div>
@@ -232,8 +232,8 @@ const AdminOverview: React.FC = () => {
               <div className="absolute bottom-0 left-12 right-0 flex items-center justify-between px-2">
                 {chartData.map((d, i) => (
                   <div key={i} className="flex flex-col items-center w-full">
-                    <span className={`text-[11px] font-bold mt-2 ${d.active ? 'text-[#1A1A1A]' : 'text-gray-500'}`}>{d.month}</span>
-                    <span className="text-[10px] text-gray-400 font-medium">{d.label}</span>
+                    <span className={`text-[10px] sm:text-[11px] font-bold mt-2 ${d.active ? 'text-[#1A1A1A]' : 'text-gray-500'}`}>{d.month.slice(0, 3)}</span>
+                    <span className="text-[10px] text-gray-400 font-medium hidden sm:block">{d.label}</span>
                   </div>
                 ))}
               </div>

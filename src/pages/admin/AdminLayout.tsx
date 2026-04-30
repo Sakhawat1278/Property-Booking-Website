@@ -138,7 +138,7 @@ const AdminLayout: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Bar */}
-        <header className="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-8 gap-4 shrink-0">
+        <header className="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 md:px-8 gap-4 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -153,7 +153,7 @@ const AdminLayout: React.FC = () => {
           </div>
 
           {/* Center Search */}
-          <div className="hidden md:flex items-center flex-1 max-w-xl mx-8">
+          <div className="hidden md:flex items-center flex-1 max-w-xl mx-4 lg:mx-8">
             <div className="relative w-full group">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -169,8 +169,8 @@ const AdminLayout: React.FC = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button className="hidden sm:flex w-10 h-10 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
               <MessageSquare size={16} />
             </button>
             <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors relative">
@@ -179,13 +179,13 @@ const AdminLayout: React.FC = () => {
             </button>
             <button className="hidden sm:flex h-10 bg-brand hover:bg-brand-dark text-white px-5 rounded-full items-center gap-2 text-[13px] font-bold transition-all shadow-[0_4px_12px_rgba(255,77,0,0.2)] hover:shadow-[0_4px_16px_rgba(255,77,0,0.3)] hover:-translate-y-0.5">
               <Plus size={16} />
-              Add Property
+              <span className="hidden lg:inline">Add Property</span>
             </button>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           <Outlet />
         </main>
       </div>
