@@ -5,7 +5,8 @@ import {
   MapPin, Maximize2, Bed, Bath, Share2, Heart, ChevronLeft, ChevronRight,
   ArrowUpRight, ShieldCheck, TrendingUp, Sparkles, Zap, Hammer,
   Calendar, CheckCircle2, Phone, Mail, Star, X, Coffee, UtensilsCrossed,
-  Droplets, Flame, Sun, Wind, ArrowLeft
+  Droplets, Flame, Sun, Wind, ArrowLeft, Activity, Layers, Wifi, Thermometer,
+  ShieldAlert, BarChart3, Clock, Home
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -99,17 +100,49 @@ const PropertyDetails = () => {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
+
+    if (!formData.name || !formData.email) {
+      toast.error('Please fill in your name and email');
+      return;
+    }
     
-    // Proceed with submission logic (API call)
-    console.log('Submitting form data:', formData);
-    alert('Request sent successfully!');
-    setSidebarMode('INFO');
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .insert({
+          property_id: property.id,
+          guest_name: formData.name,
+          guest_email: formData.email,
+          guest_phone: formData.phone,
+          check_in: sidebarMode === 'VIEWING' ? formData.date.toISOString().split('T')[0] : null,
+          type: sidebarMode === 'VIEWING' ? 'VIEWING' : 'INQUIRY',
+          status: 'PENDING',
+          total_amount: 0
+        });
+
+      if (error) throw error;
+
+      toast.success('Viewing request sent successfully!');
+      setSidebarMode('INFO');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        date: new Date(),
+        timeSlot: 'MORNING',
+        tourType: 'IN_PERSON',
+        status: 'BROWSING',
+        message: ''
+      });
+    } catch (err: any) {
+      toast.error('Failed to send request: ' + err.message);
+    }
   };
 
   const handleBookingStart = () => {
@@ -208,7 +241,7 @@ const PropertyDetails = () => {
       
       <main className="pt-[80px] pb-8">
         {/* 1. TOP UTILITY BAR (Sticky Navigation & Actions) */}
-        <div className="sticky top-[64px] md:top-[80px] z-40 bg-white/80 backdrop-blur-md px-4 md:px-8 py-3 flex items-center justify-between md:grid md:grid-cols-3 transition-all duration-300 border-b border-gray-100/50">
+        <div className="sticky top-[64px] md:top-[80px] z-40 bg-white/80 backdrop-blur-md px-4 md:px-8 py-3 flex items-center justify-between md:grid md:grid-cols-3 transition-all duration-300">
           {/* Left: Go Back */}
           <div className="flex justify-start">
             <button 
@@ -441,6 +474,49 @@ const PropertyDetails = () => {
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Year Built</span>
                       <span className="text-[14px] font-bold text-[#1A1A1A]">{property.yearBuilt || '2024'}</span>
+                    </div>
+                  </div>
+
+                  {/* Advanced Technical Specifications */}
+                  <div className="mt-12 pt-10 border-t border-gray-100">
+                    <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Technical Specifications</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+                          <Layers size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Floor Level</span>
+                          <span className="text-[14px] font-bold text-[#1A1A1A]">{property.floorLevel || '1'} of {property.totalFloors || '1'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+                          <Wifi size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Internet</span>
+                          <span className="text-[14px] font-bold text-[#1A1A1A]">{property.internetType || 'Fiber'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+                          <Thermometer size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cooling</span>
+                          <span className="text-[14px] font-bold text-[#1A1A1A]">{property.coolingSystem || 'Central'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+                          <Zap size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Energy Rating</span>
+                          <span className="text-[14px] font-bold text-[#1A1A1A]">{property.energyRating || 'A+'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -704,52 +780,107 @@ const PropertyDetails = () => {
                     className="flex flex-col h-full"
                   >
                     {/* Dynamic Agent/Owner Info */}
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex items-center gap-3 mb-4">
                       <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
                           <img 
                             src={property.ownerImage || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'} 
                             className="w-full h-full object-cover" 
                             alt={property.ownerName}
                           />
                         </div>
-                        <div className={`absolute top-0 left-0 w-3 h-3 ${property.ownerType === 'AGENCY' ? 'bg-blue-500' : 'bg-brand'} border-2 border-white rounded-full z-10 shadow-sm`} />
+                        <div className={`absolute top-0 left-0 w-2.5 h-2.5 ${property.ownerType === 'AGENCY' ? 'bg-blue-500' : 'bg-brand'} border-2 border-white rounded-full z-10 shadow-sm`} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[16px] font-bold leading-tight">{property.ownerName || 'Nestory Representative'}</span>
-                        <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">
+                        <span className="text-[14px] font-bold leading-tight">{property.ownerName || 'Nestory Representative'}</span>
+                        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
                           {property.ownerTitle || 'Luxury Advisor'}
                         </span>
                       </div>
                     </div>
 
                     {/* Property Core */}
-                    <div className="flex flex-col gap-1 mb-6">
-                      <h1 className="text-[28px] font-bold leading-tight tracking-tight">{property.title}</h1>
-                      <p className="text-[13px] text-gray-400 font-medium leading-relaxed line-clamp-8">{property.description}</p>
+                    <div className="flex flex-col gap-1 mb-4">
+                      <h1 className="text-[24px] font-bold leading-tight tracking-tight">{property.title}</h1>
+                      <p className="text-[12px] text-gray-400 font-medium leading-relaxed line-clamp-3">
+                        {property.quickDescription || property.description}
+                      </p>
                     </div>
 
-                    <div className="flex flex-col gap-1 mb-6">
+                    <div className="flex flex-col gap-1 mb-4 relative group">
                       <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Pricing Strategy:</span>
-                      <span className="text-[32px] font-bold tracking-tight text-brand">${property.price?.toLocaleString()}</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[28px] font-bold tracking-tight text-brand">${property.price?.toLocaleString()}</span>
+                        {property.estimatedROI && (
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20">
+                            <TrendingUp size={10} className="text-brand" />
+                            <span className="text-[9px] font-black text-brand uppercase">{property.estimatedROI}% ROI</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Compact Specs Table */}
-                    <div className="flex flex-col border-t border-gray-200 mb-8">
+                    <div className="flex flex-col border-t border-gray-200 mb-4">
                       {[
                         { icon: Bed, label: 'Beds', val: property.bedrooms < 10 ? `0${property.bedrooms}` : property.bedrooms },
                         { icon: Bath, label: 'Baths', val: property.bathrooms < 10 ? `0${property.bathrooms}` : property.bathrooms },
                         { icon: Maximize2, label: 'Sq Ft', val: property.totalArea?.toLocaleString() },
                         { icon: Calendar, label: 'Built', val: property.yearBuilt || '2024' }
                       ].map((spec, i) => (
-                        <div key={i} className="flex justify-between items-center py-3.5 border-b border-gray-200 group hover:bg-gray-50/50 px-2 transition-all">
+                        <div key={i} className="flex justify-between items-center py-2 border-b border-gray-200 group hover:bg-gray-50/50 px-2 transition-all">
                           <div className="flex items-center gap-3">
-                            <spec.icon size={14} className="text-[#1A1A1A]" />
-                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{spec.label}</span>
+                            <spec.icon size={12} className="text-[#1A1A1A]" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{spec.label}</span>
                           </div>
-                          <span className="text-[14px] font-bold">{spec.val}</span>
+                          <span className="text-[13px] font-bold">{spec.val}</span>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Financial/Lease Details (Added) */}
+                    <div className="flex flex-col gap-2 mb-6 p-4 bg-gray-50/50 rounded-[20px] border border-gray-100">
+                      {property.status === 'FOR_SALE' ? (
+                        <>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">Est. Mortgage</span>
+                            <span className="font-bold text-[#1A1A1A]">${property.mortgageEstimate?.toLocaleString()}/mo</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">HOA Fees</span>
+                            <span className="font-bold text-[#1A1A1A]">${property.hoaFees?.toLocaleString()}/mo</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">Tenure</span>
+                            <span className="font-black text-brand uppercase tracking-tighter text-[10px]">{property.tenure}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">Security Deposit</span>
+                            <span className="font-bold text-[#1A1A1A]">${property.securityDeposit?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">Lease Term</span>
+                            <span className="font-bold text-[#1A1A1A]">{property.leaseDuration}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-gray-400 font-bold uppercase tracking-widest">Furnishing</span>
+                            <span className="font-bold text-[#1A1A1A]">{property.furnishingStatus}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-gray-100">
+                            <div className="flex flex-col">
+                              <span className="text-[8px] font-bold text-gray-400 uppercase">Pets</span>
+                              <span className={`text-[10px] font-bold ${property.petsAllowed ? 'text-green-600' : 'text-red-500'}`}>{property.petsAllowed ? 'Allowed' : 'No'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[8px] font-bold text-gray-400 uppercase">Utilities</span>
+                              <span className={`text-[10px] font-bold ${property.utilitiesIncluded ? 'text-blue-600' : 'text-gray-400'}`}>{property.utilitiesIncluded ? 'Included' : 'Excl.'}</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Dual-Action Button Row */}
@@ -758,22 +889,22 @@ const PropertyDetails = () => {
                         <motion.button 
                           onClick={() => setSidebarMode('BOOKING')}
                           whileHover="hover"
-                          className="group relative flex-1 h-10 bg-[#1A1A1A] hover:bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
+                          className="group relative flex-1 h-9 bg-[#1A1A1A] hover:bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
                         >
-                          <span className="text-[12px] font-normal z-10 whitespace-nowrap">Book Stay</span>
-                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
-                            <ArrowUpRight size={14} strokeWidth={2} />
+                          <span className="text-[11px] font-normal z-10 whitespace-nowrap">Book Stay</span>
+                          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
+                            <ArrowUpRight size={13} strokeWidth={2} />
                           </div>
                         </motion.button>
                       ) : (
                         <motion.button 
                           onClick={() => setSidebarMode('VIEWING')}
                           whileHover="hover"
-                          className="group relative flex-1 h-10 bg-[#1A1A1A] hover:bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
+                          className="group relative flex-1 h-9 bg-[#1A1A1A] hover:bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
                         >
-                          <span className="text-[12px] font-normal z-10 whitespace-nowrap">Request viewing</span>
-                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
-                            <ArrowUpRight size={14} strokeWidth={2} />
+                          <span className="text-[11px] font-normal z-10 whitespace-nowrap">Request viewing</span>
+                          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
+                            <ArrowUpRight size={13} strokeWidth={2} />
                           </div>
                         </motion.button>
                       )}
@@ -781,13 +912,13 @@ const PropertyDetails = () => {
                       <motion.button 
                         onClick={() => setSidebarMode('CONTACT')}
                         whileHover="hover"
-                        className="group relative flex-1 h-10 bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
+                        className="group relative flex-1 h-9 bg-brand text-white rounded-full flex items-center justify-between pl-4 pr-1 overflow-hidden transition-all duration-500"
                       >
-                        <span className="text-[12px] font-normal z-10 whitespace-nowrap">
+                        <span className="text-[11px] font-normal z-10 whitespace-nowrap">
                           {property.ownerType === 'AGENCY' ? 'Contact agency' : 'Contact owner'}
                         </span>
-                        <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
-                          <Mail size={14} strokeWidth={2} className="text-white" />
+                        <div className="w-7 h-7 rounded-full bg-brand-dark flex items-center justify-center z-10 transition-transform duration-300 group-hover:rotate-45">
+                          <Mail size={13} strokeWidth={2} className="text-white" />
                         </div>
                       </motion.button>
                     </div>
@@ -1206,9 +1337,17 @@ const PropertyDetails = () => {
           onClose={() => setIsCheckoutOpen(false)}
           amount={totalAmount}
           propertyName={property.title}
+          propertyId={property.id}
+          guestEmail={user?.email || ''}
+          bookingData={{
+            checkIn,
+            checkOut,
+            adults,
+            children
+          }}
           onSuccess={() => {
             setSidebarMode('INFO');
-            // Normally navigate to a trips/bookings page
+            toast.success('Booking confirmed!');
           }}
         />
       )}

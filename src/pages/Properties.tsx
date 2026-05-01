@@ -42,6 +42,18 @@ const Properties = () => {
 
   useEffect(() => {
     fetchProperties();
+
+    // Realtime listener for live property search results
+    const channel = supabase
+      .channel('properties-list-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
+        fetchProperties();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchProperties = async () => {

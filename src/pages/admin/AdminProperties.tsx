@@ -28,6 +28,18 @@ const AdminProperties: React.FC = () => {
 
   useEffect(() => {
     fetchProperties();
+
+    // Realtime subscription for live updates
+    const channel = supabase
+      .channel('admin-properties-all')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
+        fetchProperties();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchProperties = async () => {

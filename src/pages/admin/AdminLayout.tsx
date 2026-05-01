@@ -182,10 +182,6 @@ const AdminLayout: React.FC = () => {
               <Bell size={16} />
               <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-brand border-2 border-white" />
             </button>
-            <button className="hidden sm:flex h-10 bg-brand hover:bg-brand-dark text-white px-5 rounded-full items-center gap-2 text-[13px] font-bold transition-all shadow-[0_4px_12px_rgba(255,77,0,0.2)] hover:shadow-[0_4px_16px_rgba(255,77,0,0.3)] hover:-translate-y-0.5">
-              <Plus size={16} />
-              <span className="hidden lg:inline">Add Property</span>
-            </button>
           </div>
         </header>
 

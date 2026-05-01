@@ -24,6 +24,18 @@ const Home = () => {
 
   useEffect(() => {
     fetchProperties();
+
+    // Realtime listener for live featured properties
+    const channel = supabase
+      .channel('home-featured-props')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
+        fetchProperties();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchProperties = async () => {

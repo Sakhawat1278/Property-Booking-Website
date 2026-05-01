@@ -11,11 +11,11 @@ interface CustomDropdownProps {
   options: Option[];
   value: string;
   onChange: (value: string) => void;
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChange, label, icon }) => {
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChange, icon }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,24 +52,16 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChang
   };
 
   return (
-    <div className="flex-1 w-full px-3 py-1.5 flex items-center gap-2 relative group" ref={dropdownRef}>
-      {icon && (
-        <div className="text-brand/70 group-hover:text-brand transition-colors duration-300">
-          {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { size: 16 })}
-        </div>
-      )}
-      <div className="flex flex-col flex-1 cursor-pointer select-none" onClick={toggleDropdown}>
-        {label && <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{label}</span>}
-        <div className="flex items-center justify-between">
-          <span className="text-[#1A1A1A] text-[13px] font-medium tracking-tight">{selectedOption.label}</span>
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown size={14} className="text-gray-300 group-hover:text-brand transition-colors" />
-          </motion.div>
-        </div>
-      </div>
+    <div className="flex-1 w-full h-11 px-4 flex items-center justify-between relative group cursor-pointer select-none" ref={dropdownRef} onClick={toggleDropdown}>
+      <span className="text-[#1A1A1A] text-[13px] font-medium tracking-tight">
+        {selectedOption.label}
+      </span>
+      <motion.div
+        animate={{ rotate: isOpen ? 180 : 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ChevronDown size={14} className="text-gray-400 group-hover:text-brand transition-colors" />
+      </motion.div>
 
       <AnimatePresence>
         {isOpen && (

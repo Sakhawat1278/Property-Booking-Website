@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, Lock, CheckCircle2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -8,9 +9,19 @@ interface CheckoutModalProps {
   onSuccess: () => void;
   amount: number;
   propertyName: string;
+  propertyId?: string;
+  guestEmail?: string;
+  bookingData?: {
+    checkIn: Date;
+    checkOut: Date;
+    adults: number;
+    children: number;
+  };
 }
 
-const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSuccess, amount, propertyName }) => {
+const CheckoutModal: React.FC<CheckoutModalProps> = ({ 
+  isOpen, onClose, onSuccess, amount, propertyName, propertyId, guestEmail, bookingData 
+}) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -20,12 +31,34 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSucces
   const [cvc, setCvc] = useState('');
   const [name, setName] = useState('');
 
-  const handlePayment = (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // 1. Simulate payment delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // 2. Insert booking into Supabase if details are provided
+      if (propertyId && bookingData) {
+        const { error } = await supabase
+          .from('bookings')
+          .insert({
+            property_id: propertyId,
+            guest_name: name,
+            guest_email: guestEmail || 'guest@example.com',
+            check_in: bookingData.checkIn.toISOString().split('T')[0],
+            check_out: bookingData.checkOut.toISOString().split('T')[0],
+            adults: bookingData.adults,
+            children: bookingData.children,
+            total_amount: amount,
+            type: 'BOOKING',
+            status: 'CONFIRMED'
+          });
+
+        if (error) throw error;
+      }
+
       setLoading(false);
       setSuccess(true);
       
@@ -40,7 +73,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSucces
         setCvc('');
         setName('');
       }, 2000);
-    }, 1500);
+
+    } catch (err: any) {
+      setLoading(false);
+      toast.error('Booking failed: ' + err.message);
+    }
   };
 
   return (

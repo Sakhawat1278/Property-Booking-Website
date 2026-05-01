@@ -101,8 +101,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, index }) => {
           </span>
         </div>
         
-        <div className="flex items-center gap-1 text-[#0E9272] text-[10px] mb-3">
-          <div className="w-4 h-4 rounded-full bg-[#0E9272]/10 flex items-center justify-center">
+        <div className="flex items-center gap-1 text-[#FF4D00] text-[10px] mb-3">
+          <div className="w-4 h-4 rounded-full bg-[#FF4D00]/10 flex items-center justify-center">
             <IconLocation />
           </div>
           <span className="truncate opacity-80">{property.address || property.city}</span>
