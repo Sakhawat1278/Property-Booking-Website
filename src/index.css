@@ -49,4 +49,8 @@
   .input-edit {
     @apply w-full h-10 px-4 bg-gray-50 border border-gray-200 rounded-xl text-[13px] text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A] focus:bg-white transition-all;
   }
+
+  .input-modern {
+    @apply w-full h-11 px-4 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] text-[#1A1A1A] font-medium focus:outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all placeholder:text-gray-300;
+  }
 }
