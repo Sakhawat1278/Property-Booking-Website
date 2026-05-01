@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { properties as localProperties } from '../data/properties';
+import { supabase } from '../lib/supabase';
 import CustomDropdown from '../components/ui/CustomDropdown';
 import CustomDatePicker from '../components/ui/CustomDatePicker';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +22,33 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [galleryTab, setGalleryTab] = useState('PREVIEW');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isScanning, setIsScanning] = useState(true);
+  const [sidebarMode, setSidebarMode] = useState<'INFO' | 'VIEWING' | 'CONTACT' | 'BOOKING'>('INFO');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const { user } = useAuth();
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    date: new Date(),
+    timeSlot: 'MORNING',
+    tourType: 'IN_PERSON',
+    status: 'BROWSING',
+    inquiryType: 'DETAILS',
+    message: ''
+  });
+
+  // Booking State
+  const [checkIn, setCheckIn] = useState<Date>(new Date());
+  const [checkOut, setCheckOut] = useState<Date>(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000));
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -73,12 +100,27 @@ const PropertyDetails = () => {
   }, []);
 
   useEffect(() => {
-    const foundProperty = localProperties.find(p => p.slug === slug);
-    if (foundProperty) {
-      setProperty(foundProperty);
-    }
-    setLoading(false);
+    fetchProperty();
   }, [slug]);
+
+  const fetchProperty = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      
+      if (error) throw error;
+      setProperty(data);
+    } catch (err: any) {
+      console.error('Error fetching property:', err.message);
+      navigate('/properties');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Initial Scroll
   useEffect(() => {

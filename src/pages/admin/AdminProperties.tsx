@@ -8,6 +8,7 @@ import { properties as allProperties } from '../../data/properties';
 import { useModalStore } from '../../store/useModalStore';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
 
 const statusLabels: Record<string, string> = {
   FOR_SALE: 'For Sale',
@@ -17,12 +18,34 @@ const statusLabels: Record<string, string> = {
 type Property = (typeof allProperties)[0];
 
 const AdminProperties: React.FC = () => {
-  const [properties, setProperties] = useState<Property[]>(allProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   
   const { openModal } = useModalStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (err: any) {
+      toast.error('Error fetching properties: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter
   const filtered = properties.filter(p => {
@@ -38,16 +61,38 @@ const AdminProperties: React.FC = () => {
       description: `Are you sure you want to permanently delete "${title}"? This action cannot be undone.`,
       confirmText: 'Delete Property',
       danger: true,
-      onConfirm: () => {
-        setProperties(prev => prev.filter(p => p.id !== id));
-        toast.success('Property deleted successfully');
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('properties')
+            .delete()
+            .eq('id', id);
+          
+          if (error) throw error;
+          
+          setProperties(prev => prev.filter(p => p.id !== id));
+          toast.success('Property deleted successfully');
+        } catch (err: any) {
+          toast.error('Delete failed: ' + err.message);
+        }
       }
     });
   };
 
-  const toggleVerification = (id: string, current: boolean) => {
-    setProperties(prev => prev.map(p => p.id === id ? { ...p, isVerified: !current } : p));
-    toast.success(current ? 'Property unverified' : 'Property verified');
+  const toggleVerification = async (id: string, current: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ isVerified: !current })
+        .eq('id', id);
+      
+      if (error) throw error;
+
+      setProperties(prev => prev.map(p => p.id === id ? { ...p, isVerified: !current } : p));
+      toast.success(current ? 'Property unverified' : 'Property verified');
+    } catch (err: any) {
+      toast.error('Update failed: ' + err.message);
+    }
   };
 
   return (

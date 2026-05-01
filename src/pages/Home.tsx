@@ -10,6 +10,7 @@ import CustomDatePicker from '../components/ui/CustomDatePicker';
 import PropertyCard from '../components/PropertyCard';
 import LocationAutocomplete from '../components/ui/LocationAutocomplete';
 import { properties as localProperties } from '../data/properties';
+import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,14 +19,32 @@ const Home = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [location, setLocation] = useState('');
   
-  const [properties] = useState<any[]>(localProperties);
-  const [loading] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    fetchProperties();
   }, []);
 
-  const featuredProperties = properties.slice(0, 5);
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (err: any) {
+      console.error('Error fetching properties:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const featuredProperties = properties;
 
   const propertyOptions = [
     { label: 'All Types', value: 'All' },
