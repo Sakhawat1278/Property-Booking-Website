@@ -49,34 +49,6 @@ const PropertyDetails = () => {
   const [checkOut, setCheckOut] = useState<Date>(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000));
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isScanning, setIsScanning] = useState(true);
-  const [sidebarMode, setSidebarMode] = useState<'INFO' | 'VIEWING' | 'CONTACT' | 'BOOKING'>('INFO');
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const { user } = useAuth();
-
-  // Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    date: new Date(),
-    timeSlot: 'MORNING',
-    tourType: 'IN_PERSON',
-    status: 'BROWSING',
-    inquiryType: 'DETAILS',
-    message: ''
-  });
-
-  // Booking State
-  const [checkIn, setCheckIn] = useState<Date>(new Date());
-  const [checkOut, setCheckOut] = useState<Date>(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000));
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  
   // Calculations
   const nights = Math.max(1, Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 3600 * 24)));
   
