@@ -51,6 +51,10 @@
   }
 
   .input-modern {
-    @apply w-full h-11 px-4 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] text-[#1A1A1A] font-medium focus:outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all placeholder:text-gray-300;
+    @apply w-full h-11 px-4 bg-white border border-gray-300 rounded-xl text-[13px] text-[#1A1A1A] font-medium focus:outline-none focus:border-[#1A1A1A] focus:ring-4 focus:ring-black/5 transition-all placeholder:text-gray-400;
+  }
+
+  .admin-card {
+    @apply bg-white rounded-2xl border border-gray-300 overflow-hidden transition-all;
   }
 }
