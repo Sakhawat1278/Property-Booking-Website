@@ -4,7 +4,8 @@ import {
   ArrowLeft, Save, MapPin, Building2, Tag, 
   DollarSign, Activity, Image as ImageIcon, Home,
   Loader2, X, Plus, User, ShieldAlert, BarChart3,
-  Calendar, Info, School, Zap, Droplets, Flame, Sun, Wind
+  Calendar, Info, School, Zap, Droplets, Flame, Sun, Wind,
+  ChevronDown, Bed, Bath
 } from 'lucide-react';
 import { supabase, uploadImage } from '../../lib/supabase';
 import type { Property } from '../../data/properties';
