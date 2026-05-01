@@ -8,6 +8,7 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminProperties from './pages/admin/AdminProperties';
 import AdminPropertyEditor from './pages/admin/AdminPropertyEditor';
 import AdminBookings from './pages/admin/AdminBookings';
+import AdminUsers from './pages/admin/AdminUsers';
 import AdminRoute from './components/AdminRoute';
 
 import { AuthProvider } from './context/AuthContext';
@@ -48,6 +49,7 @@ function App() {
             <Route path="properties/new" element={<AdminPropertyEditor />} />
             <Route path="properties/edit/:id" element={<AdminPropertyEditor />} />
             <Route path="bookings" element={<AdminBookings />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </Router>
