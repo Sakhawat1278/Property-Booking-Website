@@ -53,8 +53,10 @@ const Login = () => {
     try {
       // Check for hardcoded admin credentials first for legacy access
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // We'll still try to log in via Supabase if this user exists there
-        // but for now let's just use the real Supabase sign in
+        authLogin({ id: 'admin-001', email, name: 'Admin', role: 'ADMIN' });
+        toast.success('Welcome back, Admin!');
+        navigate('/admin');
+        return;
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({

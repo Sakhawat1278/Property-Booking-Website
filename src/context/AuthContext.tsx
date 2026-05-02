@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   session: any | null;
   isLoading: boolean;
+  login: (user: User) => void;
   logout: () => Promise<void>;
 }
 
@@ -24,19 +25,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get initial session
+    // 1. Check for mock admin first (bypass)
+    const mockAdmin = localStorage.getItem('mock_admin');
+    
+    // 2. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchProfile(session.user);
-      else setIsLoading(false);
+      if (session) {
+        fetchProfile(session.user);
+      } else if (mockAdmin) {
+        setUser(JSON.parse(mockAdmin));
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+      }
     });
 
-    // 2. Listen for auth changes
+    // 3. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session) {
+        localStorage.removeItem('mock_admin'); // Clear bypass if real session exists
         await fetchProfile(session.user);
-      } else {
+      } else if (!localStorage.getItem('mock_admin')) {
         setUser(null);
         setIsLoading(false);
       }
@@ -54,7 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
-        // If profile doesn't exist yet, we might still have meta_data
         setUser({
           id: supabaseUser.id,
           email: supabaseUser.email || '',
@@ -76,14 +86,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const login = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('mock_admin', JSON.stringify(userData));
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('mock_admin');
     setUser(null);
     setSession(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, logout }}>
+    <AuthContext.Provider value={{ user, session, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
