@@ -124,14 +124,33 @@ const AgencyLayout: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link to="/" className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all" title="Go to Website">
-              <Home size={16} />
-            </Link>
-            <button className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all relative">
-              <Bell size={16} />
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-white" />
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Link to="/" className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all" title="Go to Website">
+                <Home size={16} />
+              </Link>
+              <button className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all relative">
+                <Bell size={16} />
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-white" />
+              </button>
+            </div>
+
+            <div className="h-8 w-px bg-gray-200 mx-1" />
+
+            <div className="flex items-center gap-3 pl-1">
+              <div className="flex flex-col items-end hidden sm:flex">
+                <span className="text-[13px] font-bold text-black leading-none">{user?.name || 'Agency Partner'}</span>
+                <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter mt-1">Verified Partner</span>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-black font-bold text-[14px] shrink-0 overflow-hidden">
+                {user?.avatar_url ? (
+                   <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                   <span>{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
+                )}
+              </div>
+            </div>
+
             <Link to="/agency/properties/new">
               <button className="h-9 px-4 bg-emerald-600 text-white rounded-lg text-[13px] font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all ml-2 shadow-sm">
                 <Plus size={16} />
