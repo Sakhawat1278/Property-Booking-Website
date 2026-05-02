@@ -168,7 +168,7 @@ const AdminUsers: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -225,7 +225,7 @@ const AdminUsers: React.FC = () => {
               initial={{ scale: 0.98, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
               exit={{ scale: 0.98, opacity: 0 }}
-              className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
                <div className="px-8 py-6 border-b border-gray-200 flex items-center justify-between">
                   <div>
