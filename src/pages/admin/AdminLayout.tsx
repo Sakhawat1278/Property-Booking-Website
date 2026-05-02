@@ -84,18 +84,14 @@ const AdminLayout: React.FC = () => {
       </nav>
 
       {/* User Footer */}
-      <div className="p-4 border-t border-gray-50">
-        <div className="flex items-center gap-3 p-2">
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
-             <div className="w-full h-full bg-indigo-50 flex items-center justify-center text-indigo-500 font-bold text-[12px]">
-               {user?.name?.charAt(0).toUpperCase() || 'A'}
-             </div>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-bold text-black truncate">{user?.name || 'Admin'}</span>
-            <button onClick={handleLogout} className="text-[11px] text-black hover:text-red-500 text-left transition-colors font-medium">Log Out</button>
-          </div>
-        </div>
+      <div className="p-4 border-t border-gray-100">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-black hover:bg-gray-50 rounded-xl transition-all group"
+        >
+          <LogOut size={18} className="text-black opacity-30 group-hover:opacity-100 transition-opacity" />
+          Log Out
+        </button>
       </div>
     </aside>
   );

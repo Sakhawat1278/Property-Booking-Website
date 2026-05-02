@@ -77,17 +77,13 @@ const AgencyLayout: React.FC = () => {
       </nav>
 
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3 p-2 bg-gray-50/50 rounded-xl border border-gray-100">
-          <div className="w-9 h-9 rounded-lg overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
-             <span className="text-black font-bold text-[14px]">
-               {user?.name?.charAt(0).toUpperCase() || 'A'}
-             </span>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-[12px] font-bold text-black truncate">{user?.name || 'Agency User'}</span>
-            <button onClick={handleLogout} className="text-[10px] text-red-500 hover:underline text-left font-bold uppercase tracking-wider">Log Out</button>
-          </div>
-        </div>
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-black hover:bg-gray-50 rounded-xl transition-all group"
+        >
+          <LogOut size={18} className="text-black opacity-30 group-hover:opacity-100 transition-opacity" />
+          Log Out
+        </button>
       </div>
     </aside>
   );
