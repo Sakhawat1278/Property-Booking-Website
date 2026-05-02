@@ -14,7 +14,6 @@ import AdminBuyers from './pages/admin/AdminBuyers';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminSettings from './pages/admin/AdminSettings';
-import AdminSettings from './pages/admin/AdminSettings';
 import AgencyLayout from './pages/agency/AgencyLayout';
 import AgencyOverview from './pages/agency/AgencyOverview';
 import AgencyProperties from './pages/agency/AgencyProperties';
