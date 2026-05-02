@@ -162,10 +162,13 @@ const AdminLayout: React.FC = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
-            <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-colors">
+            <Link to="/" className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors" title="Go to Website">
+              <Home size={16} />
+            </Link>
+            <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors">
               <MessageSquare size={16} />
             </button>
-            <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-colors relative">
+            <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors relative">
               <Bell size={16} />
               <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />
             </button>

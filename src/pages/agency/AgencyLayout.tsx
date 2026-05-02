@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-do
 import { 
   LayoutDashboard, Building2, CalendarCheck, Users, 
   LogOut, Menu, X, Search, Bell, MessageSquare, Plus,
-  Target, User as UserIcon, Settings, BarChart3
+  Target, User as UserIcon, Settings, BarChart3, Home
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -129,6 +129,9 @@ const AgencyLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link to="/" className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors" title="Go to Website">
+              <Home size={16} />
+            </Link>
             <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors relative">
               <Bell size={16} />
               <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
