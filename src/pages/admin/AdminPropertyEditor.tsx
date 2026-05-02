@@ -98,31 +98,25 @@ const AdminPropertyEditor: React.FC = () => {
       if (error) throw error;
       if (data) setForm(data);
     } catch (err: any) {
-      toast.error('Error fetching property: ' + err.message);
+      toast.error('Failed to load property: ' + err.message);
       navigate('/admin/properties');
     } finally {
       setInitialLoading(false);
     }
   };
 
-  const handleChange = (field: keyof Property, value: any) => {
+  const handleChange = (field: string, value: any) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: keyof Property, isArray: boolean = false) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       setLoading(true);
       const url = await uploadImage(file);
-      
-      if (isArray) {
-        const current = (form[field] as string[]) || [];
-        handleChange(field, [...current, url]);
-      } else {
-        handleChange(field, url);
-      }
+      handleChange('primaryImage', url);
       toast.success('Image uploaded successfully');
     } catch (err: any) {
       toast.error('Upload failed: ' + err.message);
@@ -131,33 +125,37 @@ const AdminPropertyEditor: React.FC = () => {
     }
   };
 
-  const removeGalleryImage = (field: keyof Property, index: number) => {
-    const current = (form[field] as string[]) || [];
-    handleChange(field, current.filter((_, i) => i !== index));
-  };
-
   const handleSave = async () => {
-    if (!form.title) {
-      toast.error('Property title is required');
+    if (!form.title || !form.price) {
+      toast.error('Title and Price are required');
       return;
     }
 
     try {
       setLoading(true);
-      const slug = form.slug || form.title?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-      const payload = {
+      const propertyData = {
         ...form,
-        slug,
-        updated_at: new Date().toISOString(),
+        slug: form.title?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('properties').upsert(payload);
-      if (error) throw error;
-
-      toast.success(id ? 'Property updated successfully!' : 'Property published successfully!');
+      if (id) {
+        const { error } = await supabase
+          .from('properties')
+          .update(propertyData)
+          .eq('id', id);
+        if (error) throw error;
+        toast.success('Property updated successfully');
+      } else {
+        const { error } = await supabase
+          .from('properties')
+          .insert([propertyData]);
+        if (error) throw error;
+        toast.success('Property published successfully');
+      }
       navigate('/admin/properties');
     } catch (err: any) {
-      toast.error('Error saving property: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -166,39 +164,40 @@ const AdminPropertyEditor: React.FC = () => {
   if (initialLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin text-brand" size={32} />
+        <Loader2 className="animate-spin text-indigo-500" size={32} />
       </div>
     );
   }
 
-  // Selection Step
-  if (step === 'SELECTION') {
+  if (step === 'SELECTION' && !id) {
     return (
-      <div className="w-full max-w-4xl mx-auto py-20 px-6 text-center animate-in zoom-in-95 duration-500">
-        <h1 className="text-4xl font-bold text-[#1A1A1A] mb-4">What type of listing is this?</h1>
-        <p className="text-gray-500 mb-12">Select your listing type to see specialized fields.</p>
+      <div className="max-w-4xl mx-auto space-y-12 py-12 font-poppins">
+        <div className="text-center">
+          <h1 className="text-[32px] font-bold text-black mb-2">What are you listing today?</h1>
+          <p className="text-black/60 text-[16px]">Choose the primary purpose of your new property listing.</p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <button 
             onClick={() => { handleChange('status', 'FOR_SALE'); setStep('FORM'); }}
-            className="group p-10 bg-white border-2 border-gray-100 rounded-[40px] hover:border-brand transition-all text-left"
+            className="group bg-white p-10 rounded-2xl border border-gray-200 text-left transition-all hover:border-indigo-600 hover:ring-4 hover:ring-indigo-50"
           >
-            <div className="w-16 h-16 rounded-3xl bg-brand/5 text-brand flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <DollarSign size={32} />
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+              <Tag size={28} />
             </div>
-            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">For Sale</h2>
-            <p className="text-gray-500 text-[14px]">Best for residential, commercial or luxury properties ready for ownership transfer.</p>
+            <h2 className="text-[20px] font-bold text-black mb-2">For Sale</h2>
+            <p className="text-black/60 text-[14px]">Best for villas, townhouses, penthouses, or commercial lands available for purchase.</p>
           </button>
-          
+
           <button 
             onClick={() => { handleChange('status', 'FOR_RENT'); setStep('FORM'); }}
-            className="group p-10 bg-white border-2 border-gray-100 rounded-[40px] hover:border-brand transition-all text-left"
+            className="group bg-white p-10 rounded-2xl border border-gray-200 text-left transition-all hover:border-indigo-600 hover:ring-4 hover:ring-indigo-50"
           >
-            <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Clock size={32} />
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+              <Key size={28} />
             </div>
-            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">For Rent</h2>
-            <p className="text-gray-500 text-[14px]">Best for apartments, short-term stays, or lease-based commercial spaces.</p>
+            <h2 className="text-[20px] font-bold text-black mb-2">For Rent</h2>
+            <p className="text-black/60 text-[14px]">Best for apartments, short-term stays, or lease-based commercial spaces.</p>
           </button>
         </div>
       </div>
@@ -206,267 +205,176 @@ const AdminPropertyEditor: React.FC = () => {
   }
 
   return (
-    <div className="w-full pb-24 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto space-y-8 font-poppins pb-24 animate-in fade-in duration-500">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-        <div className="flex items-center gap-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/admin/properties')}
-            className="w-10 h-10 rounded-xl bg-white border border-gray-300 flex items-center justify-center text-gray-500 hover:text-brand hover:border-brand transition-all"
+            className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-black hover:bg-gray-50 transition-all"
           >
             <ArrowLeft size={18} />
           </button>
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-[24px] font-bold text-[#1A1A1A] tracking-tight">
-                {id ? 'Edit Listing' : 'Create Listing'}
-              </h1>
-              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                form.status === 'FOR_SALE' ? 'bg-brand/10 text-brand' : 'bg-blue-50 text-blue-600'
-              }`}>
-                {form.status === 'FOR_SALE' ? 'Selling' : 'Rental'}
-              </span>
-            </div>
+            <h1 className="text-[20px] font-bold text-black">
+              {id ? 'Edit Property' : 'New Listing'}
+            </h1>
+            <p className="text-[12px] text-black/60 font-medium">Drafting: {form.title || 'Untitled'}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/admin/properties')}
-            className="px-6 h-11 rounded-xl bg-white border border-gray-300 text-[13px] font-bold text-gray-600 hover:bg-gray-50 transition-all"
+            className="px-5 h-10 rounded-lg bg-white border border-gray-200 text-[13px] font-bold text-black hover:bg-gray-50 transition-all"
           >
-            Cancel
+            Discard
           </button>
           <button 
             onClick={handleSave}
             disabled={loading}
-            className="px-7 h-11 rounded-xl bg-[#1A1A1A] text-white text-[13px] font-bold flex items-center gap-3 hover:bg-brand transition-all disabled:opacity-50"
+            className="px-6 h-10 rounded-lg bg-indigo-600 text-white text-[13px] font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-            {id ? 'Save Changes' : 'Publish Property'}
+            {id ? 'Update Listing' : 'Publish Property'}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* LEFT SECTION */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column - Main Info */}
         <div className="lg:col-span-8 space-y-6">
-          
-          <SectionCard title="General Info" icon={<Building2 size={16} />}>
+          <SectionCard title="Primary Information" icon={<Building2 size={16} />}>
             <div className="space-y-6">
               <Field label="Property Title" required>
-                <input value={form.title} onChange={e => handleChange('title', e.target.value)} className="input-modern" placeholder="e.g. Skyline Luxury Penthouse" />
+                <input value={form.title} onChange={e => handleChange('title', e.target.value)} className="modern-input" placeholder="e.g. Skyline Luxury Penthouse" />
               </Field>
-              <Field label="Quick Summary (Top/Sidebar)" required>
-                <textarea value={form.quickDescription} onChange={e => handleChange('quickDescription', e.target.value)} className="input-modern min-h-[80px] py-3 resize-none" placeholder="A short 1-2 sentence hook for the top section..." />
+              <Field label="Description" required>
+                <textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className="modern-input min-h-[140px] py-3 resize-none" placeholder="Provide a detailed overview..." />
               </Field>
-              <Field label="Full Detailed Narrative" required>
-                <textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className="input-modern min-h-[140px] py-3 resize-none" placeholder="Provide a detailed story about this property..." />
-              </Field>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field label="Category">
-                  <div className="border border-gray-300 rounded-xl bg-white">
-                    <CustomDropdown value={form.category || 'RESIDENTIAL'} onChange={val => handleChange('category', val)} options={[
-                      { label: 'Residential', value: 'RESIDENTIAL' }, { label: 'Commercial', value: 'COMMERCIAL' },
-                      { label: 'Luxury', value: 'LUXURY' }, { label: 'Vacation', value: 'VACATION' },
-                    ]} />
-                  </div>
+                  <CustomDropdown value={form.category || 'RESIDENTIAL'} onChange={val => handleChange('category', val)} options={[
+                    { label: 'Residential', value: 'RESIDENTIAL' }, { label: 'Commercial', value: 'COMMERCIAL' },
+                    { label: 'Luxury', value: 'LUXURY' }, { label: 'Vacation', value: 'VACATION' },
+                  ]} />
                 </Field>
-                <Field label="Listing Type">
-                  <div className="border border-gray-300 rounded-xl bg-white">
-                    <CustomDropdown value={form.status || 'FOR_SALE'} onChange={val => handleChange('status', val)} options={[
-                      { label: 'For Sale', value: 'FOR_SALE' }, { label: 'For Rent', value: 'FOR_RENT' },
-                    ]} />
-                  </div>
+                <Field label="Listing Status">
+                  <CustomDropdown value={form.status || 'FOR_SALE'} onChange={val => handleChange('status', val)} options={[
+                    { label: 'For Sale', value: 'FOR_SALE' }, { label: 'For Rent', value: 'FOR_RENT' },
+                  ]} />
                 </Field>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Advanced Technical Specs" icon={<Activity size={16} />}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Field label="Beds" icon={<Bed size={12} />}><input type="number" value={form.bedrooms} onChange={e => handleChange('bedrooms', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Baths" icon={<Bath size={12} />}><input type="number" value={form.bathrooms} onChange={e => handleChange('bathrooms', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Sq Ft" icon={<Hash size={12} />}><input type="number" value={form.totalArea} onChange={e => handleChange('totalArea', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Year" icon={<Calendar size={12} />}><input type="number" value={form.yearBuilt} onChange={e => handleChange('yearBuilt', Number(e.target.value))} className="input-modern text-center" /></Field>
-              
-              <Field label="Floor Level" icon={<Layers size={12} />}><input type="number" value={form.floorLevel} onChange={e => handleChange('floorLevel', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Total Floors" icon={<Layers size={12} />}><input type="number" value={form.totalFloors} onChange={e => handleChange('totalFloors', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Parking" icon={<Hash size={12} />}><input type="number" value={form.parkingSpaces} onChange={e => handleChange('parkingSpaces', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Energy Rating" icon={<Zap size={12} />}><input value={form.energyRating} onChange={e => handleChange('energyRating', e.target.value)} className="input-modern text-center" placeholder="A+" /></Field>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
-              <Field label="Internet Type" icon={<Wifi size={12} />}><input value={form.internetType} onChange={e => handleChange('internetType', e.target.value)} className="input-modern" placeholder="e.g. Fiber Optic" /></Field>
-              <Field label="Cooling" icon={<Zap size={12} />}><input value={form.coolingSystem} onChange={e => handleChange('coolingSystem', e.target.value)} className="input-modern" placeholder="e.g. Central AC" /></Field>
-              <Field label="Heating" icon={<Thermometer size={12} />}><input value={form.heatingSystem} onChange={e => handleChange('heatingSystem', e.target.value)} className="input-modern" placeholder="e.g. Electric" /></Field>
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Visuals & Amenities" icon={<ImageIcon size={16} />}>
-            <div className="space-y-10">
-              <GalleryGrid title="Main Cover" images={form.primaryImage ? [form.primaryImage] : []} onUpload={e => handleFileUpload(e, 'primaryImage')} onRemove={() => handleChange('primaryImage', '')} loading={loading} isSingle />
-              <div className="space-y-8">
-                <GalleryGrid title="Exterior" images={form.exteriorGallery || []} onUpload={e => handleFileUpload(e, 'exteriorGallery', true)} onRemove={idx => removeGalleryImage('exteriorGallery', idx)} loading={loading} />
-                <GalleryGrid title="Living Area" images={form.livingGallery || []} onUpload={e => handleFileUpload(e, 'livingGallery', true)} onRemove={idx => removeGalleryImage('livingGallery', idx)} loading={loading} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
-                <Field label="Internal Amenities"><textarea value={form.internalAmenities} onChange={e => handleChange('internalAmenities', e.target.value)} className="input-modern min-h-[100px] py-3 text-[12px]" placeholder="Smart Home, Gym, Marble Floors..." /></Field>
-                <Field label="External Amenities"><textarea value={form.externalAmenities} onChange={e => handleChange('externalAmenities', e.target.value)} className="input-modern min-h-[100px] py-3 text-[12px]" placeholder="Pool, Garden, 24/7 Security..." /></Field>
+          <SectionCard title="Location & Access" icon={<MapPin size={16} />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Field label="City" required><input value={form.city} onChange={e => handleChange('city', e.target.value)} className="modern-input" placeholder="e.g. Dubai" /></Field>
+              <Field label="Neighborhood" required><input value={form.neighborhood} onChange={e => handleChange('neighborhood', e.target.value)} className="modern-input" placeholder="e.g. Downtown" /></Field>
+              <div className="md:col-span-2">
+                <Field label="Full Address" required><input value={form.address} onChange={e => handleChange('address', e.target.value)} className="modern-input" placeholder="e.g. Sheikh Zayed Road, Suite 402" /></Field>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Location" icon={<MapPin size={16} />}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Address"><input value={form.address} onChange={e => handleChange('address', e.target.value)} className="input-modern" /></Field>
-              <Field label="City"><input value={form.city} onChange={e => handleChange('city', e.target.value)} className="input-modern" /></Field>
-              <Field label="Neighborhood"><input value={form.neighborhood} onChange={e => handleChange('neighborhood', e.target.value)} className="input-modern" /></Field>
-              <Field label="Country"><input value={form.country} onChange={e => handleChange('country', e.target.value)} className="input-modern" /></Field>
+          <SectionCard title="Key Specifications" icon={<Activity size={16} />}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <Field label="Beds" icon={<Bed size={12} />}><input type="number" value={form.bedrooms} onChange={e => handleChange('bedrooms', Number(e.target.value))} className="modern-input text-center" /></Field>
+              <Field label="Baths" icon={<Bath size={12} />}><input type="number" value={form.bathrooms} onChange={e => handleChange('bathrooms', Number(e.target.value))} className="modern-input text-center" /></Field>
+              <Field label="Sq Ft" icon={<Hash size={12} />}><input type="number" value={form.totalArea} onChange={e => handleChange('totalArea', Number(e.target.value))} className="modern-input text-center" /></Field>
+              <Field label="Year" icon={<Calendar size={12} />}><input type="number" value={form.yearBuilt} onChange={e => handleChange('yearBuilt', Number(e.target.value))} className="modern-input text-center" /></Field>
             </div>
           </SectionCard>
         </div>
 
-        {/* RIGHT SECTION: CONDITIONAL */}
+        {/* Right Column - Media & Pricing */}
         <div className="lg:col-span-4 space-y-6">
-          
-          {/* SPECIALIZED FINANCIALS */}
-          <SectionCard title={form.status === 'FOR_SALE' ? 'Sales Financials' : 'Rental Terms'} icon={<CreditCard size={16} />}>
-            <div className="space-y-4">
-              <Field label={form.status === 'FOR_SALE' ? 'Asking Price' : 'Monthly Rent'}>
+          <SectionCard title="Pricing & Value" icon={<DollarSign size={16} />}>
+            <div className="space-y-6">
+              <Field label="Market Price" required>
                 <div className="relative">
-                  <DollarSign size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input type="number" value={form.price} onChange={e => handleChange('price', Number(e.target.value))} className="input-modern pl-10" />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-black">$</span>
+                  <input type="number" value={form.price} onChange={e => handleChange('price', Number(e.target.value))} className="modern-input pl-8" placeholder="0.00" />
                 </div>
               </Field>
+              <Field label="Currency">
+                <CustomDropdown value={form.currency || 'USD'} onChange={val => handleChange('currency', val)} options={[
+                  { label: 'USD ($)', value: 'USD' }, { label: 'EUR (€)', value: 'EUR' }, { label: 'AED (د.إ)', value: 'AED' },
+                ]} />
+              </Field>
+            </div>
+          </SectionCard>
 
-              {form.status === 'FOR_SALE' ? (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Annual Tax"><input type="number" value={form.propertyTax} onChange={e => handleChange('propertyTax', Number(e.target.value))} className="input-modern text-center" /></Field>
-                    <Field label="HOA Fees"><input type="number" value={form.hoaFees} onChange={e => handleChange('hoaFees', Number(e.target.value))} className="input-modern text-center" /></Field>
-                  </div>
-                  <Field label="Est. Mortgage/mo"><input type="number" value={form.mortgageEstimate} onChange={e => handleChange('mortgageEstimate', Number(e.target.value))} className="input-modern" /></Field>
-                  <Field label="Tenure">
-                    <div className="border border-gray-300 rounded-xl bg-white">
-                      <CustomDropdown value={form.tenure || 'FREEHOLD'} onChange={val => handleChange('tenure', val)} options={[{ label: 'Freehold', value: 'FREEHOLD' }, { label: 'Leasehold', value: 'LEASEHOLD' }]} />
-                    </div>
-                  </Field>
-                </>
+          <SectionCard title="Featured Media" icon={<ImageIcon size={16} />}>
+            <div className="space-y-4">
+              {form.primaryImage ? (
+                <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-200 group">
+                  <img src={form.primaryImage} alt="" className="w-full h-full object-cover" />
+                  <button 
+                    onClick={() => handleChange('primaryImage', '')}
+                    className="absolute top-2 right-2 w-8 h-8 bg-black text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               ) : (
-                <>
-                  <Field label="Security Deposit"><input type="number" value={form.securityDeposit} onChange={e => handleChange('securityDeposit', Number(e.target.value))} className="input-modern" /></Field>
-                  <Field label="Lease Duration"><input value={form.leaseDuration} onChange={e => handleChange('leaseDuration', e.target.value)} className="input-modern" placeholder="e.g. 1 Year Min" /></Field>
-                  <Field label="Furnishing">
-                    <div className="border border-gray-300 rounded-xl bg-white">
-                      <CustomDropdown value={form.furnishingStatus || 'UNFURNISHED'} onChange={val => handleChange('furnishingStatus', val)} options={[
-                        { label: 'Unfurnished', value: 'UNFURNISHED' }, { label: 'Semi-Furnished', value: 'SEMI' }, { label: 'Fully Furnished', value: 'FULLY' }
-                      ]} />
-                    </div>
-                  </Field>
-                  <div className="flex gap-4 pt-2">
-                    <button onClick={() => handleChange('petsAllowed', !form.petsAllowed)} className={`flex-1 h-10 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${form.petsAllowed ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
-                      <CheckCircle2 size={14} /> Pets Allowed
-                    </button>
-                    <button onClick={() => handleChange('utilitiesIncluded', !form.utilitiesIncluded)} className={`flex-1 h-10 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${form.utilitiesIncluded ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
-                      <Droplets size={14} /> Utilities Inc.
-                    </button>
+                <label className="flex flex-col items-center justify-center aspect-video rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-all">
+                  <div className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center mb-2 shadow-sm">
+                    <Plus size={20} className="text-black" />
                   </div>
-                </>
+                  <span className="text-[11px] font-bold text-black uppercase tracking-widest">Upload Cover</span>
+                  <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+                </label>
               )}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Performance" icon={<BarChart3 size={16} />}>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Est. ROI %"><input type="number" step="0.1" value={form.estimatedROI} onChange={e => handleChange('estimatedROI', Number(e.target.value))} className="input-modern text-center" /></Field>
-              <Field label="Yield %"><input type="number" step="0.1" value={form.rentalYield} onChange={e => handleChange('rentalYield', Number(e.target.value))} className="input-modern text-center" /></Field>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <Field label="Maintenance/yr"><input type="number" value={form.maintenanceFee} onChange={e => handleChange('maintenanceFee', Number(e.target.value))} className="input-modern" /></Field>
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Verification" icon={<ShieldCheck size={16} />}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-300 rounded-xl">
-                <div>
-                  <p className="text-[12px] font-bold text-[#1A1A1A]">Verified Listing</p>
-                  <p className="text-[10px] text-gray-400 font-medium">Internal review complete</p>
-                </div>
-                <button
-                  onClick={() => handleChange('isVerified', !form.isVerified)}
-                  className={`w-10 h-5 rounded-full p-1 transition-all ${form.isVerified ? 'bg-brand' : 'bg-gray-300'}`}
-                >
-                  <div className={`w-3 h-3 rounded-full bg-white transition-transform ${form.isVerified ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
-              </div>
-              <Field label="Search Tags"><input value={form.tags} onChange={e => handleChange('tags', e.target.value)} className="input-modern" placeholder="e.g. Luxury, View, Waterfront" /></Field>
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Publisher" icon={<User size={16} />}>
-            <div className="space-y-4">
-              <Field label="Name"><input value={form.ownerName} onChange={e => handleChange('ownerName', e.target.value)} className="input-modern" /></Field>
-              <Field label="Entity">
-                <div className="border border-gray-300 rounded-xl bg-white">
-                  <CustomDropdown value={form.ownerType || 'INDIVIDUAL'} onChange={val => handleChange('ownerType', val)} options={[
-                    { label: 'Private Owner', value: 'INDIVIDUAL' }, { label: 'Agency / Developer', value: 'AGENCY' },
-                  ]} />
-                </div>
-              </Field>
+              <p className="text-[10px] text-black/40 font-medium text-center">Recommended size: 1920x1080 (JPG, PNG)</p>
             </div>
           </SectionCard>
         </div>
       </div>
+      
+      {/* Internal Classes for the modern inputs */}
+      <style>{`
+        .modern-input {
+          width: 100%;
+          height: 40px;
+          padding: 0 16px;
+          background: white;
+          border: 1px solid #E5E7EB;
+          border-radius: 8px;
+          font-size: 13px;
+          color: black;
+          transition: all 0.2s;
+        }
+        .modern-input:focus {
+          outline: none;
+          border-color: #4F46E5;
+          box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.05);
+        }
+        .modern-input::placeholder {
+          color: #9CA3AF;
+        }
+      `}</style>
     </div>
   );
 };
 
-/* --- SUBCOMPONENTS --- */
-
-const SectionCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-  <div className="bg-white rounded-2xl border border-gray-300">
-    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3 rounded-t-2xl">
-      <div className="text-gray-400">{icon}</div>
-      <h2 className="text-[12px] font-bold text-[#1A1A1A] tracking-wider uppercase">{title}</h2>
+const SectionCard: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
+  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+      <div className="text-black">{icon}</div>
+      <h3 className="text-[14px] font-bold text-black">{title}</h3>
     </div>
     <div className="p-6">{children}</div>
   </div>
 );
 
-const Field: React.FC<{ label: string; icon?: React.ReactNode; required?: boolean; children: React.ReactNode }> = ({ label, icon, required, children }) => (
-  <div className="w-full">
-    <label className="flex items-center gap-2 mb-2 px-1 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-      {icon} {label} {required && <span className="text-brand">*</span>}
+const Field: React.FC<{ label: string; required?: boolean; icon?: React.ReactNode; children: React.ReactNode }> = ({ label, required, icon, children }) => (
+  <div className="space-y-1.5">
+    <label className="flex items-center gap-2 text-[11px] font-bold text-black uppercase tracking-widest ml-1">
+      {icon} {label} {required && <span className="text-red-500">*</span>}
     </label>
     {children}
-  </div>
-);
-
-const GalleryGrid: React.FC<{ title: string; images: string[]; onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void; onRemove: (idx: number) => void; loading: boolean; isSingle?: boolean }> = ({ title, images, onUpload, onRemove, loading, isSingle }) => (
-  <div className="space-y-3">
-    <div className="flex justify-between items-center px-1">
-      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{title}</span>
-      {!isSingle && <span className="text-[10px] text-gray-300">{images.length} / 12</span>}
-    </div>
-    <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-      {images.map((url, idx) => (
-        <div key={idx} className="aspect-square rounded-xl border border-gray-200 overflow-hidden relative group bg-gray-50">
-          <img src={url} alt="" className="w-full h-full object-cover" />
-          <button onClick={() => onRemove(idx)} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-            <X size={14} className="text-white" />
-          </button>
-        </div>
-      ))}
-      {(!isSingle || images.length === 0) && (
-        <div className="aspect-square rounded-xl border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center relative cursor-pointer hover:bg-gray-100 transition-colors">
-          <Plus size={16} className="text-gray-400" />
-          <input type="file" onChange={onUpload} disabled={loading} className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-        </div>
-      )}
-    </div>
   </div>
 );
 
