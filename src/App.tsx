@@ -14,7 +14,16 @@ import AdminBuyers from './pages/admin/AdminBuyers';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminSettings from './pages/admin/AdminSettings';
+import AgencyLayout from './pages/agency/AgencyLayout';
+import AgencyOverview from './pages/agency/AgencyOverview';
+import AgencyProperties from './pages/agency/AgencyProperties';
+import AgencyLeads from './pages/agency/AgencyLeads';
+import AgencyBookings from './pages/agency/AgencyBookings';
+import AgencyAnalytics from './pages/agency/AgencyAnalytics';
+import AgencySettings from './pages/agency/AgencySettings';
 import AdminRoute from './components/AdminRoute';
+import AgencyRoute from './components/AgencyRoute';
 
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'sonner';
@@ -60,6 +69,25 @@ function App() {
             <Route path="transactions" element={<AdminTransactions />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
+          {/* Agency Dashboard */}
+          <Route
+            path="/agency"
+            element={
+              <AgencyRoute>
+                <AgencyLayout />
+              </AgencyRoute>
+            }
+          >
+            <Route index element={<AgencyOverview />} />
+            <Route path="properties" element={<AgencyProperties />} />
+            <Route path="properties/new" element={<AdminPropertyEditor />} />
+            <Route path="properties/edit/:id" element={<AdminPropertyEditor />} />
+            <Route path="leads" element={<AgencyLeads />} />
+            <Route path="bookings" element={<AgencyBookings />} />
+            <Route path="analytics" element={<AgencyAnalytics />} />
+            <Route path="settings" element={<AgencySettings />} />
           </Route>
         </Routes>
       </Router>

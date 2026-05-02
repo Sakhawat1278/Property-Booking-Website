@@ -72,6 +72,8 @@ const Login = () => {
       const userRole = data.user.user_metadata?.role || 'USER';
       if (userRole === 'ADMIN' || email === ADMIN_EMAIL) {
         navigate('/admin');
+      } else if (userRole === 'AGENCY') {
+        navigate('/agency');
       } else {
         navigate('/');
       }
