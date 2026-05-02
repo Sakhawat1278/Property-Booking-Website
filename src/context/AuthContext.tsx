@@ -49,7 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session) {
         await fetchProfile(session.user);
       } else {
-        setUser(null);
+        const mockAdmin = localStorage.getItem('mock_admin');
+        if (!mockAdmin) {
+          setUser(null);
+        } else {
+          setUser(JSON.parse(mockAdmin));
+        }
         setIsLoading(false);
       }
     });
