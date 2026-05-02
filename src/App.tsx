@@ -9,6 +9,11 @@ import AdminProperties from './pages/admin/AdminProperties';
 import AdminPropertyEditor from './pages/admin/AdminPropertyEditor';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminLeads from './pages/admin/AdminLeads';
+import AdminBuyers from './pages/admin/AdminBuyers';
+import AdminTransactions from './pages/admin/AdminTransactions';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminSettings from './pages/admin/AdminSettings';
 import AdminRoute from './components/AdminRoute';
 
 import { AuthProvider } from './context/AuthContext';
@@ -50,6 +55,11 @@ function App() {
             <Route path="properties/edit/:id" element={<AdminPropertyEditor />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="leads" element={<AdminLeads />} />
+            <Route path="buyers" element={<AdminBuyers />} />
+            <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
       </Router>
