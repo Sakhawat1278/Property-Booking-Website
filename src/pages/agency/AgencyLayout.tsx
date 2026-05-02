@@ -129,12 +129,12 @@ const AgencyLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/" className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors" title="Go to Website">
+            <Link to="/" className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all" title="Go to Website">
               <Home size={16} />
             </Link>
-            <button className="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-black transition-colors relative">
+            <button className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-black transition-all relative">
               <Bell size={16} />
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-white" />
             </button>
             <Link to="/agency/properties/new">
               <button className="h-9 px-4 bg-emerald-600 text-white rounded-lg text-[13px] font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all ml-2 shadow-sm">
