@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "profiles" (
     "avatar_url" text,
     "cover_url" text,
     "bio" text,
+    "verification_status" text DEFAULT 'PENDING',
     "status" text DEFAULT 'ACTIVE',
     "created_at" timestamptz DEFAULT now(),
     "updated_at" timestamptz DEFAULT now()

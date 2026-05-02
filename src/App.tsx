@@ -22,6 +22,7 @@ import AgencyBookings from './pages/agency/AgencyBookings';
 import AgencyAnalytics from './pages/agency/AgencyAnalytics';
 import AgencySettings from './pages/agency/AgencySettings';
 import ProfileSettings from './pages/shared/ProfileSettings';
+import WaitingApproval from './pages/WaitingApproval';
 import AdminRoute from './components/AdminRoute';
 import AgencyRoute from './components/AgencyRoute';
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/:slug" element={<PropertyDetails />} />
+          <Route path="/waiting-approval" element={<WaitingApproval />} />
 
           {/* Admin Panel */}
           <Route

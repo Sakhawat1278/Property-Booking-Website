@@ -17,6 +17,10 @@ const AgencyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  if (user.role === 'AGENCY' && user.verification_status === 'PENDING') {
+    return <Navigate to="/waiting-approval" replace />;
+  }
+
   return <>{children}</>;
 };
 

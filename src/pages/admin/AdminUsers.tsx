@@ -12,7 +12,8 @@ interface Profile {
   name: string;
   email: string;
   role: 'ADMIN' | 'AGENCY' | 'USER';
-  status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
+  status: 'ACTIVE' | 'INACTIVE';
+  verification_status: 'PENDING' | 'APPROVED' | 'REJECTED';
   created_at: string;
   phone?: string;
 }
@@ -126,6 +127,19 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  const handleApprove = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ verification_status: 'APPROVED' })
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Account approved and verified');
+    } catch (err: any) {
+      toast.error('Approval failed: ' + err.message);
+    }
+  };
+
   return (
     <div className="space-y-6 font-poppins text-black">
       <div className="flex items-center justify-between">
@@ -184,7 +198,12 @@ const AdminUsers: React.FC = () => {
                 <tr key={profile.id} className="hover:bg-gray-50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-black shrink-0">
+                      <div className="w-9 h-9 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-black shrink-0 relative overflow-hidden">
+                        {profile.verification_status === 'APPROVED' ? (
+                           <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                              <Award size={6} className="text-white" />
+                           </div>
+                        ) : null}
                         <UserIcon size={18} />
                       </div>
                       <div>
@@ -199,13 +218,26 @@ const AdminUsers: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${profile.status === 'ACTIVE' ? 'bg-green-600' : 'bg-gray-300'}`} />
-                      <span className="text-[11px] font-bold text-black uppercase">{profile.status}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${profile.status === 'ACTIVE' ? 'bg-green-600' : 'bg-gray-300'}`} />
+                        <span className="text-[11px] font-bold text-black uppercase">{profile.status}</span>
+                      </div>
+                      <span className={`text-[9px] font-bold uppercase tracking-tighter ${profile.verification_status === 'APPROVED' ? 'text-emerald-600' : 'text-amber-500'}`}>
+                        {profile.verification_status}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {profile.verification_status === 'PENDING' && (
+                        <button 
+                          onClick={() => handleApprove(profile.id)}
+                          className="px-3 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition-all mr-2"
+                        >
+                          Approve
+                        </button>
+                      )}
                       <button className="p-2 text-black hover:text-indigo-600 transition-colors"><Edit3 size={14} /></button>
                       <button onClick={() => handleDelete(profile.id)} className="p-2 text-black hover:text-red-600 transition-colors"><Trash2 size={14} /></button>
                     </div>
