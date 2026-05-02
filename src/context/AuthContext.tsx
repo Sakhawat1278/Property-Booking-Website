@@ -101,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (userData: User) => {
     setUser(userData);
+    setIsLoading(false);
     if (userData.id === '00000000-0000-0000-0000-000000000000') {
       localStorage.setItem('mock_admin', JSON.stringify(userData));
     }
