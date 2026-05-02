@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -34,10 +34,17 @@ const Login = () => {
   const [experience, setExperience] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login: authLogin } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (user.role === 'ADMIN') navigate('/admin');
+      else if (user.role === 'AGENCY') navigate('/agency');
+      else navigate('/');
+    }
+  }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,31 +52,27 @@ const Login = () => {
       toast.error('Please enter both email and password');
       return;
     }
-    setLoading(true);
     
     try {
-
+      setLoading(true);
+      console.log('Attempting login for:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
       
+      console.log('Login success:', data.user?.id);
       toast.success('Welcome back!');
       
-      // Check role from metadata or profile
-      const userRole = data.user.user_metadata?.role || 'USER';
-      if (userRole === 'ADMIN') {
-        navigate('/admin');
-      } else if (userRole === 'AGENCY') {
-        navigate('/agency');
-      } else {
-        navigate('/');
-      }
+      // The useEffect will handle redirection once the auth state updates
     } catch (err: any) {
       toast.error(err.message || 'Invalid email or password');
-    } finally {
       setLoading(false);
     }
   };
@@ -80,9 +83,9 @@ const Login = () => {
       toast.error('Please fill in all required fields');
       return;
     }
-    setLoading(true);
-
+    
     try {
+      setLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -104,31 +107,25 @@ const Login = () => {
       
       if (data.session) {
         toast.success('Account created successfully!');
-        navigate('/');
+        // Redirection handled by useEffect
       } else {
         toast.info('Please check your email for the verification link');
         setMode('login');
+        setLoading(false);
       }
     } catch (err: any) {
       toast.error(err.message);
-    } finally {
       setLoading(false);
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -15,
-      transition: { duration: 0.3 }
-    }
-  };
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6 font-poppins overflow-hidden">
@@ -144,7 +141,7 @@ const Login = () => {
         onClick={() => navigate('/')}
         className="fixed top-8 left-8 z-30 flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
       >
-        <div className="w-8 h-8 rounded-full border border-white/20 bg-white/10 flex items-center justify-center group-hover:border-brand transition-colors">
+        <div className="w-8 h-8 rounded-full border border-white/20 bg-white/10 flex items-center justify-center group-hover:border-[#FF4D00] transition-colors">
           <IconArrowLeft />
         </div>
         <span className="text-[13px] font-normal tracking-tight">Back to Home</span>
@@ -172,7 +169,7 @@ const Login = () => {
                 <circle cx="50" cy="40" r="3" fill="#FF4D00" />
               </svg>
             </div>
-            <h1 className="text-[18px] font-normal tracking-tight text-brand uppercase">Nestory</h1>
+            <h1 className="text-[18px] font-normal tracking-tight text-[#FF4D00] uppercase">Nestory</h1>
           </div>
 
           <AnimatePresence mode="wait" initial={false}>
@@ -189,8 +186,6 @@ const Login = () => {
                   <p className="text-gray-400 text-[13px]">Access your account</p>
                 </div>
 
-
-
                 <form className="space-y-3" onSubmit={handleLogin}>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
@@ -202,7 +197,7 @@ const Login = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Email address"
                       required
-                      className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                      className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                     />
                   </div>
 
@@ -216,12 +211,12 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"
                       required
-                      className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                      className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                     />
                   </div>
 
                   <div className="flex justify-end px-1 mb-1">
-                    <button type="button" onClick={() => setMode('forgot')} className="text-[11px] font-medium text-brand hover:underline">Forgot password?</button>
+                    <button type="button" onClick={() => setMode('forgot')} className="text-[11px] font-medium text-[#FF4D00] hover:underline">Forgot password?</button>
                   </div>
 
                   <div className="flex justify-center mt-2">
@@ -229,10 +224,10 @@ const Login = () => {
                       whileHover="shineHover"
                       disabled={loading}
                       type="submit"
-                      className={`group relative h-10 bg-brand text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-4 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      className={`group relative h-10 bg-[#FF4D00] text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-4 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                       <span className="text-[13px] font-normal">{loading ? 'Signing in...' : 'Sign in'}</span>
-                      <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
+                      <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
                         <IconArrowRight />
                       </div>
                       <motion.div
@@ -247,7 +242,7 @@ const Login = () => {
 
                 <p className="mt-6 text-center text-gray-400 text-[12px]">
                   New here?{' '}
-                  <button onClick={() => setMode('signup')} className="font-bold text-brand hover:underline">Create account</button>
+                  <button onClick={() => setMode('signup')} className="font-bold text-[#FF4D00] hover:underline">Create account</button>
                 </p>
               </motion.div>
             )}
@@ -260,20 +255,20 @@ const Login = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                             <div className="mb-6">
+                 <div className="mb-6">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1 text-center">Account Type</label>
                   <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
                     <button 
                       type="button"
                       onClick={() => setRole('USER')}
-                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'USER' ? 'bg-brand text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'USER' ? 'bg-[#FF4D00] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                       Buyer
                     </button>
                     <button 
                       type="button"
                       onClick={() => setRole('AGENCY')}
-                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'AGENCY' ? 'bg-brand text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'AGENCY' ? 'bg-[#FF4D00] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                       Agency / Developer
                     </button>
@@ -289,7 +284,7 @@ const Login = () => {
                       <input 
                         type="text" value={name} onChange={(e) => setName(e.target.value)}
                         placeholder="Full name" required
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                       />
                     </div>
                     <div className="relative">
@@ -299,7 +294,7 @@ const Login = () => {
                       <input 
                         type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                         placeholder="Phone number" 
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                       />
                     </div>
 
@@ -312,7 +307,7 @@ const Login = () => {
                           <input 
                             type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)}
                             placeholder="Agency / Company Name"
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                         <div className="relative col-span-2">
@@ -322,7 +317,7 @@ const Login = () => {
                           <input 
                             type="text" value={address} onChange={(e) => setAddress(e.target.value)}
                             placeholder="Business Address"
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                         <div className="relative">
@@ -332,7 +327,7 @@ const Login = () => {
                           <input 
                             type="text" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)}
                             placeholder="License No. (Optional)"
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                         <div className="relative">
@@ -342,7 +337,7 @@ const Login = () => {
                           <input 
                             type="url" value={website} onChange={(e) => setWebsite(e.target.value)}
                             placeholder="Website (Optional)"
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                       </>
@@ -360,7 +355,7 @@ const Login = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email address" 
                         required
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
                       />
                     </div>
 
@@ -374,7 +369,7 @@ const Login = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password" 
                         required
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
                       />
                     </div>
                   </div>
@@ -384,10 +379,10 @@ const Login = () => {
                       whileHover="shineHover"
                       disabled={loading}
                       type="submit"
-                      className={`group relative h-10 bg-brand text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-6 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      className={`group relative h-10 bg-[#FF4D00] text-white pl-8 pr-1 rounded-full overflow-hidden flex items-center gap-6 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                       <span className="text-[13px] font-normal">{loading ? 'Creating...' : 'Create Account'}</span>
-                      <div className="w-8 h-8 rounded-full bg-brand-dark flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
+                      <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-white transition-transform duration-300 group-hover:rotate-45 scale-90">
                         <IconArrowRight />
                       </div>
                       <motion.div
@@ -402,7 +397,7 @@ const Login = () => {
 
                 <p className="mt-6 text-center text-gray-400 text-[12px]">
                   Already joined?{' '}
-                  <button onClick={() => setMode('login')} className="font-bold text-brand hover:underline">Sign in</button>
+                  <button onClick={() => setMode('login')} className="font-bold text-[#FF4D00] hover:underline">Sign in</button>
                 </p>
               </motion.div>
             )}
@@ -416,7 +411,7 @@ const Login = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="mb-6">
-                  <button onClick={() => setMode('login')} className="flex items-center gap-2 text-brand text-[12px] font-bold mb-4 group">
+                  <button onClick={() => setMode('login')} className="flex items-center gap-2 text-[#FF4D00] text-[12px] font-bold mb-4 group">
                     <div className="group-hover:-translate-x-1 transition-transform scale-90"><IconArrowLeft /></div>
                     Back to Login
                   </button>
@@ -429,7 +424,7 @@ const Login = () => {
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
                       <IconMail />
                     </div>
-                    <input type="email" placeholder="Email address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" />
+                    <input type="email" placeholder="Email address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-[#FF4D00] focus:ring-4 focus:ring-[#FF4D00]/5 outline-none transition-all placeholder:text-gray-300 font-normal" />
                   </div>
 
                   <div className="flex justify-center mt-2">
@@ -458,8 +453,8 @@ const Login = () => {
 
       {/* Sticky Footer Links */}
       <div className="fixed bottom-8 right-8 z-30 flex gap-6 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">
-        <a href="#" className="hover:text-brand transition-colors">Privacy</a>
-        <a href="#" className="hover:text-brand transition-colors">Terms</a>
+        <a href="#" className="hover:text-[#FF4D00] transition-colors">Privacy</a>
+        <a href="#" className="hover:text-[#FF4D00] transition-colors">Terms</a>
       </div>
       </div>
     </div>
