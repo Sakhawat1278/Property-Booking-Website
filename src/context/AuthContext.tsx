@@ -7,6 +7,13 @@ interface User {
   email: string;
   name?: string;
   role: 'ADMIN' | 'AGENCY' | 'USER';
+  verification_status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  avatar_url?: string;
+  cover_url?: string;
+  bio?: string;
+  phone?: string;
+  business_name?: string;
+  license_number?: string;
 }
 
 interface AuthContextType {
@@ -25,33 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        fetchProfile(session.user);
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session) {
-        await fetchProfile(session.user);
-      } else {
-        setUser(null);
-        setIsLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const fetchProfile = async (supabaseUser: SupabaseUser) => {
+    // Safety timeout to prevent permanent loading screens
+    const timeoutId = setTimeout(() => {
+      console.warn('Profile fetch timed out. Using fallback metadata.');
+      setIsLoading(false);
+    }, 5000);
+
     try {
+      console.log('Fetching profile for:', supabaseUser.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -59,35 +48,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
+        console.warn('Profile fetch error (using metadata):', error.message);
         setUser({
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: supabaseUser.user_metadata?.name || '',
           role: supabaseUser.user_metadata?.role || 'USER',
+          verification_status: 'APPROVED', // Assume approved if profile missing for now
         });
       } else {
+        console.log('Profile loaded successfully');
         setUser({
           id: data.id,
           email: data.email,
           name: data.name,
           role: data.role,
+          verification_status: data.verification_status,
+          avatar_url: data.avatar_url,
+          cover_url: data.cover_url,
+          bio: data.bio,
+          phone: data.phone,
+          business_name: data.business_name,
+          license_number: data.license_number,
         });
       }
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      console.error('Critical Auth Error:', err);
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        setSession(initialSession);
+        if (initialSession) {
+          await fetchProfile(initialSession.user);
+        } else {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Auth initialization failed:', err);
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (!mounted) return;
+      
+      console.log('Auth state changed:', _event);
+      setSession(newSession);
+      if (newSession) {
+        await fetchProfile(newSession.user);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
   };
 
   const logout = async () => {
+    setIsLoading(true);
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    setIsLoading(false);
   };
 
   const refreshUser = async () => {
