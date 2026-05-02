@@ -178,7 +178,7 @@ const AdminLayout: React.FC = () => {
                 <span className="text-[13px] font-bold text-black leading-none">{user?.name || 'Admin'}</span>
                 <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter mt-1">Administrator</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-black font-bold text-[14px] shrink-0 overflow-hidden">
+              <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-black font-bold text-[13px] shrink-0 overflow-hidden">
                 {user?.avatar_url ? (
                   <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
