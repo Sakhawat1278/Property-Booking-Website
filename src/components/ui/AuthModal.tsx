@@ -27,7 +27,7 @@ type AuthMode = 'login' | 'signup' | 'forgot';
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [mode, setMode] = useState<AuthMode>('login');
-  const [role, setRole] = useState<'USER' | 'OWNER' | 'BUILDER'>('USER');
+  const [role, setRole] = useState<'USER' | 'AGENCY'>('USER');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -129,8 +129,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
               style={{ 
                 width: mode === 'login' ? 380 : 
                        mode === 'forgot' ? 380 :
-                       role === 'USER' ? 400 :
-                       role === 'OWNER' ? 500 : 550 
+                       role === 'USER' ? 400 : 500 
               }}
               className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl pointer-events-auto relative overflow-hidden"
             >
@@ -230,17 +229,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                     </div>
 
                     <div className="mb-6">
-                      <div className="grid grid-cols-3 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
-                        {['USER', 'OWNER', 'BUILDER'].map((r) => (
-                          <button 
-                            key={r}
-                            type="button"
-                            onClick={() => setRole(r as any)}
-                            className={`h-8 rounded-full text-[10px] font-bold transition-all ${role === r ? 'bg-brand text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
-                          >
-                            {r === 'USER' ? 'Buyer' : r.charAt(0) + r.slice(1).toLowerCase()}
-                          </button>
-                        ))}
+                      <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
+                        <button 
+                          key="USER"
+                          type="button"
+                          onClick={() => setRole('USER')}
+                          className={`h-8 rounded-full text-[10px] font-bold transition-all ${role === 'USER' ? 'bg-brand text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                          Buyer
+                        </button>
+                        <button 
+                          key="AGENCY"
+                          type="button"
+                          onClick={() => setRole('AGENCY')}
+                          className={`h-8 rounded-full text-[10px] font-bold transition-all ${role === 'AGENCY' ? 'bg-brand text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                          Agency / Developer
+                        </button>
                       </div>
                     </div>
 
@@ -254,29 +259,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconPhone /></div>
                           <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
                         </div>
-                        {(role === 'OWNER' || role === 'BUILDER') && (
-                          <div className="relative col-span-2">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconBriefcase /></div>
-                            <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder={role === 'OWNER' ? 'Property / Business Name' : 'Company Name'} className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
-                          </div>
-                        )}
-
-                        {role === 'OWNER' && (
-                          <div className="relative col-span-2">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconMapPin /></div>
-                            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Primary Address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
-                          </div>
-                        )}
-
-                        {role === 'BUILDER' && (
+                        {role === 'AGENCY' && (
                           <>
-                            <div className="relative">
-                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconShield /></div>
-                              <input type="text" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} placeholder="License Number" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                            <div className="relative col-span-2">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconBriefcase /></div>
+                              <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Agency / Company Name" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
                             </div>
-                            <div className="relative">
-                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconGlobe /></div>
-                              <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="Company Website" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
+                            <div className="relative col-span-2">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90"><IconMapPin /></div>
+                              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Business Address" className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand outline-none transition-all" />
                             </div>
                           </>
                         )}

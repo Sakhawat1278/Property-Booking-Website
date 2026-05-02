@@ -22,7 +22,7 @@ type AuthMode = 'login' | 'signup' | 'forgot';
 
 const Login = () => {
   const [mode, setMode] = useState<AuthMode>('login');
-  const [role, setRole] = useState<'USER' | 'OWNER' | 'BUILDER'>('USER');
+  const [role, setRole] = useState<'USER' | 'AGENCY'>('USER');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -167,8 +167,7 @@ const Login = () => {
           style={{ 
             width: mode === 'login' ? 380 : 
                    mode === 'forgot' ? 380 :
-                   role === 'USER' ? 400 :
-                   role === 'OWNER' ? 550 : 650 
+                   role === 'USER' ? 400 : 550 
           }}
           className="bg-white rounded-[32px] p-8 border border-gray-100 overflow-hidden"
         >
@@ -269,16 +268,9 @@ const Login = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-6">
-                  <h2 className="text-[22px] font-medium text-[#1A1A1A] mb-1">Create account</h2>
-                  <p className="text-gray-400 text-[13px]">Join Nestory today</p>
-                </div>
-
-
-
-                <div className="mb-6">
+                             <div className="mb-6">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1 text-center">Account Type</label>
-                  <div className="grid grid-cols-3 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
+                  <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-full border border-gray-300">
                     <button 
                       type="button"
                       onClick={() => setRole('USER')}
@@ -288,17 +280,10 @@ const Login = () => {
                     </button>
                     <button 
                       type="button"
-                      onClick={() => setRole('OWNER')}
-                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'OWNER' ? 'bg-brand text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                      onClick={() => setRole('AGENCY')}
+                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'AGENCY' ? 'bg-brand text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                      Owner
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => setRole('BUILDER')}
-                      className={`h-8 rounded-full text-[11px] font-bold transition-all ${role === 'BUILDER' ? 'bg-brand text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                      Builder
+                      Agency / Developer
                     </button>
                   </div>
                 </div>
@@ -310,70 +295,52 @@ const Login = () => {
                         <IconUser />
                       </div>
                       <input 
-                        type="text" 
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Full name" 
-                        required
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                        type="text" value={name} onChange={(e) => setName(e.target.value)}
+                        placeholder="Full name" required
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                       />
                     </div>
-
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
                         <IconPhone />
                       </div>
                       <input 
-                        type="tel" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                         placeholder="Phone number" 
-                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                        className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                       />
                     </div>
 
-                    {(role === 'OWNER' || role === 'BUILDER') && (
-                      <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
-                          <IconBriefcase />
-                        </div>
-                        <input 
-                          type="text" 
-                          value={businessName}
-                          onChange={(e) => setBusinessName(e.target.value)}
-                          placeholder={role === 'OWNER' ? 'Property / Business Name' : 'Company Name'} 
-                          className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
-                        />
-                      </div>
-                    )}
-
-                    {role === 'OWNER' && (
-                      <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
-                          <IconMapPin />
-                        </div>
-                        <input 
-                          type="text" 
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Primary Address" 
-                          className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
-                        />
-                      </div>
-                    )}
-
-                    {role === 'BUILDER' && (
+                    {role === 'AGENCY' && (
                       <>
+                        <div className="relative col-span-2">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
+                            <IconBriefcase />
+                          </div>
+                          <input 
+                            type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)}
+                            placeholder="Agency / Company Name"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                          />
+                        </div>
+                        <div className="relative col-span-2">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
+                            <IconMapPin />
+                          </div>
+                          <input 
+                            type="text" value={address} onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Business Address"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
+                          />
+                        </div>
                         <div className="relative">
                           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 scale-90">
                             <IconShield />
                           </div>
                           <input 
-                            type="text" 
-                            value={licenseNumber}
-                            onChange={(e) => setLicenseNumber(e.target.value)}
-                            placeholder="License Number" 
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                            type="text" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)}
+                            placeholder="License No. (Optional)"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                         <div className="relative">
@@ -381,11 +348,9 @@ const Login = () => {
                             <IconGlobe />
                           </div>
                           <input 
-                            type="url" 
-                            value={website}
-                            onChange={(e) => setWebsite(e.target.value)}
-                            placeholder="Company Website" 
-                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal" 
+                            type="url" value={website} onChange={(e) => setWebsite(e.target.value)}
+                            placeholder="Website (Optional)"
+                            className="w-full h-10 bg-gray-50 border border-gray-300 rounded-full pl-11 pr-4 text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all placeholder:text-gray-300 font-normal"
                           />
                         </div>
                       </>

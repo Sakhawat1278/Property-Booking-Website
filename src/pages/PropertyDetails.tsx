@@ -1226,7 +1226,7 @@ const PropertyDetails = () => {
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex flex-col">
                         <h2 className="text-[20px] font-bold tracking-tight text-[#1A1A1A]">Direct Inquiry</h2>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Contact {property.ownerType === 'AGENCY' ? 'Agency' : 'Owner'}</span>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Contact {property.ownerType === 'AGENCY' ? 'Agency / Developer' : 'Owner'}</span>
                       </div>
                       <button 
                         onClick={() => setSidebarMode('INFO')}

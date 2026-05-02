@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, UserPlus, MoreHorizontal, Shield, 
-  Mail, Calendar, Edit3, Trash2, X, Check,
-  ShieldCheck, ShieldAlert, User as UserIcon, Loader2
+  Search, UserPlus, Edit3, Trash2, User as UserIcon, Loader2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
@@ -12,15 +10,14 @@ interface Profile {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'OWNER' | 'BUILDER' | 'USER';
+  role: 'ADMIN' | 'AGENCY' | 'USER';
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
   created_at: string;
 }
 
 const roleColors: Record<string, string> = {
   ADMIN: 'bg-purple-50 text-purple-600 border-purple-100',
-  OWNER: 'bg-blue-50 text-blue-600 border-blue-100',
-  BUILDER: 'bg-amber-50 text-amber-600 border-amber-100',
+  AGENCY: 'bg-blue-50 text-blue-600 border-blue-100',
   USER: 'bg-gray-50 text-gray-600 border-gray-100',
 };
 
@@ -29,12 +26,10 @@ const AdminUsers: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     fetchUsers();
 
-    // Realtime listener
     const channel = supabase
       .channel('admin-users-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
@@ -50,21 +45,16 @@ const AdminUsers: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // For now, we try to fetch from 'profiles' table. 
-      // If it doesn't exist, we'll use mock data to keep the UI from breaking.
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.warn('Profiles table not found, using mock data for UI demo');
-        setProfiles(mockProfiles);
-      } else {
-        setProfiles(data || []);
-      }
+      if (error) throw error;
+      setProfiles(data || []);
     } catch (err: any) {
-      setProfiles(mockProfiles);
+      console.error('Error fetching users:', err.message);
+      setProfiles([]);
     } finally {
       setLoading(false);
     }
@@ -72,20 +62,19 @@ const AdminUsers: React.FC = () => {
 
   const filtered = profiles.filter(p => {
     const matchesSearch = 
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.email.toLowerCase().includes(search.toLowerCase());
+      (p.name?.toLowerCase().includes(search.toLowerCase())) ||
+      (p.email?.toLowerCase().includes(search.toLowerCase()));
     const matchesRole = roleFilter === 'ALL' || p.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this user? This will not delete their Auth account.')) return;
     
     try {
       const { error } = await supabase.from('profiles').delete().eq('id', id);
       if (error) throw error;
-      toast.success('User deleted successfully');
-      setProfiles(prev => prev.filter(p => p.id !== id));
+      toast.success('Profile removed successfully');
     } catch (err: any) {
       toast.error('Failed to delete: ' + err.message);
     }
@@ -112,7 +101,6 @@ const AdminUsers: React.FC = () => {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -125,7 +113,7 @@ const AdminUsers: React.FC = () => {
           />
         </div>
         <div className="flex gap-2">
-          {['ALL', 'ADMIN', 'OWNER', 'BUILDER', 'USER'].map(r => (
+          {['ALL', 'ADMIN', 'AGENCY', 'USER'].map(r => (
             <button
               key={r}
               onClick={() => setRoleFilter(r)}
@@ -135,13 +123,12 @@ const AdminUsers: React.FC = () => {
                   : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-300'
               }`}
             >
-              {r === 'ALL' ? 'All Roles' : r.charAt(0) + r.slice(1).toLowerCase()}
+              {r === 'ALL' ? 'All Roles' : r === 'AGENCY' ? 'Agencies / Developers' : r.charAt(0) + r.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Users Table */}
       <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -169,7 +156,7 @@ const AdminUsers: React.FC = () => {
                         <UserIcon size={20} />
                       </div>
                       <div>
-                        <p className="text-[14px] font-bold text-[#1A1A1A]">{profile.name}</p>
+                        <p className="text-[14px] font-bold text-[#1A1A1A]">{profile.name || 'Anonymous'}</p>
                         <p className="text-[12px] text-gray-400 font-medium">{profile.email}</p>
                       </div>
                     </div>
@@ -210,7 +197,7 @@ const AdminUsers: React.FC = () => {
           {filtered.length === 0 && (
             <div className="py-20 text-center text-gray-400">
               <UserIcon size={40} className="mx-auto mb-4 opacity-10" />
-              <p className="text-[14px] font-medium">No users found matching your search.</p>
+              <p className="text-[14px] font-medium">No users found in your database.</p>
             </div>
           )}
         </div>
@@ -218,13 +205,5 @@ const AdminUsers: React.FC = () => {
     </div>
   );
 };
-
-const mockProfiles: Profile[] = [
-  { id: '1', name: 'Sakhawat H.', email: 'admin@nestory.com', role: 'ADMIN', status: 'ACTIVE', created_at: '2025-01-10T10:00:00Z' },
-  { id: '2', name: 'Emily Johnson', email: 'emily@agents.com', role: 'OWNER', status: 'ACTIVE', created_at: '2025-02-15T12:30:00Z' },
-  { id: '3', name: 'Michael Smith', email: 'michael@build.com', role: 'BUILDER', status: 'ACTIVE', created_at: '2025-03-20T09:15:00Z' },
-  { id: '4', name: 'Sarah Wilson', email: 'sarah@guest.com', role: 'USER', status: 'PENDING', created_at: '2025-04-05T16:45:00Z' },
-  { id: '5', name: 'David Chen', email: 'david@nestory.com', role: 'ADMIN', status: 'INACTIVE', created_at: '2025-04-12T11:20:00Z' },
-];
 
 export default AdminUsers;

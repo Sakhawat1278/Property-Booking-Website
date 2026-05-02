@@ -412,7 +412,7 @@ const AdminPropertyEditor: React.FC = () => {
               <Field label="Entity">
                 <div className="border border-gray-300 rounded-xl bg-white">
                   <CustomDropdown value={form.ownerType || 'INDIVIDUAL'} onChange={val => handleChange('ownerType', val)} options={[
-                    { label: 'Private Owner', value: 'INDIVIDUAL' }, { label: 'Agency', value: 'AGENCY' },
+                    { label: 'Private Owner', value: 'INDIVIDUAL' }, { label: 'Agency / Developer', value: 'AGENCY' },
                   ]} />
                 </div>
               </Field>

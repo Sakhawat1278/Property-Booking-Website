@@ -6,7 +6,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
-  role: 'ADMIN' | 'OWNER' | 'BUILDER' | 'USER';
+  role: 'ADMIN' | 'AGENCY' | 'USER';
 }
 
 interface AuthContextType {
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session) {
-        localStorage.removeItem('mock_admin'); // Clear bypass if real session exists
+        localStorage.removeItem('mock_admin');
         await fetchProfile(session.user);
       } else if (!localStorage.getItem('mock_admin')) {
         setUser(null);
