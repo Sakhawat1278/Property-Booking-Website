@@ -58,10 +58,7 @@ const AdminOverview: React.FC = () => {
       // 3. Fetch Recent Properties
       const { data: recent } = await supabase
         .from('properties')
-        .select(`
-          *,
-          profiles (name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
       
@@ -169,7 +166,7 @@ const AdminOverview: React.FC = () => {
                       <span className="text-[13px] font-bold text-black">${p.price?.toLocaleString()}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[12px] text-black font-bold">{p.profiles?.name || 'In-house'}</span>
+                      <span className="text-[12px] text-black font-bold">{p.ownerName || 'Nestory'}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border ${
