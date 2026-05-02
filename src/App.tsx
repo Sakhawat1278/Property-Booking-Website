@@ -21,6 +21,7 @@ import AgencyLeads from './pages/agency/AgencyLeads';
 import AgencyBookings from './pages/agency/AgencyBookings';
 import AgencyAnalytics from './pages/agency/AgencyAnalytics';
 import AgencySettings from './pages/agency/AgencySettings';
+import ProfileSettings from './pages/shared/ProfileSettings';
 import AdminRoute from './components/AdminRoute';
 import AgencyRoute from './components/AgencyRoute';
 
@@ -68,6 +69,7 @@ function App() {
             <Route path="transactions" element={<AdminTransactions />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="profile" element={<ProfileSettings />} />
           </Route>
 
           {/* Agency Dashboard */}
@@ -87,6 +89,7 @@ function App() {
             <Route path="bookings" element={<AgencyBookings />} />
             <Route path="analytics" element={<AgencyAnalytics />} />
             <Route path="settings" element={<AgencySettings />} />
+            <Route path="profile" element={<ProfileSettings />} />
           </Route>
         </Routes>
       </Router>

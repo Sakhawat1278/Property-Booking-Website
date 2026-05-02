@@ -98,9 +98,11 @@ const AdminLayout: React.FC = () => {
             <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter">Administrator</span>
           </div>
         </div>
-        <button className="w-full py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-bold text-black hover:bg-gray-100 transition-all">
-          Profile Settings
-        </button>
+        <Link to="/admin/profile" className="block w-full">
+          <button className="w-full py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-bold text-black hover:bg-gray-100 transition-all">
+            Profile Settings
+          </button>
+        </Link>
       </div>
 
       {/* User Footer */}
