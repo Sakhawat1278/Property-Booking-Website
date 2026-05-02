@@ -44,12 +44,27 @@ const Login = () => {
     setLoading(true);
     
     try {
+      console.log('Attempting login for:', email);
+      
+      // Safety timeout for the UI
+      const loginTimeout = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+          toast.error('Authentication request timed out. Please check your connection.');
+        }
+      }, 6000);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      clearTimeout(loginTimeout);
+
+      if (error) {
+        console.error('Login error object:', error);
+        throw error;
+      }
       
       toast.success('Welcome back!');
       
