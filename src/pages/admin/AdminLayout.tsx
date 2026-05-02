@@ -51,7 +51,7 @@ const AdminLayout: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
             <div className="w-4 h-4 rounded-full bg-indigo-500" />
           </div>
-          <span className="text-[#1A1A1A] font-bold text-[18px] tracking-tight">Listora</span>
+          <span className="text-black font-bold text-[18px] tracking-tight">Listora</span>
         </div>
       </div>
 
@@ -66,8 +66,8 @@ const AdminLayout: React.FC = () => {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-[13px] transition-all group relative ${
                 isActive 
-                  ? 'bg-gray-50 text-[#1A1A1A] font-bold rounded-lg' 
-                  : 'text-gray-400 hover:text-[#1A1A1A] hover:bg-gray-50/50 rounded-lg font-medium'
+                  ? 'bg-gray-50 text-black font-bold rounded-lg' 
+                  : 'text-black/60 hover:text-black hover:bg-gray-50/50 rounded-lg font-medium'
               }`
             }
           >
@@ -91,9 +91,12 @@ const AdminLayout: React.FC = () => {
                {user?.name?.charAt(0).toUpperCase() || 'A'}
              </div>
           </div>
+            <div className="hidden lg:flex items-center gap-2">
+              <span className="text-[15px] font-bold text-black">{currentPathName}</span>
+            </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-bold text-[#1A1A1A] truncate">{user?.name || 'Admin'}</span>
-            <button onClick={handleLogout} className="text-[11px] text-gray-400 hover:text-red-500 text-left transition-colors font-medium">Log Out</button>
+            <span className="text-[13px] font-bold text-black truncate">{user?.name || 'Admin'}</span>
+            <button onClick={handleLogout} className="text-[11px] text-black hover:text-red-500 text-left transition-colors font-medium">Log Out</button>
           </div>
         </div>
       </div>

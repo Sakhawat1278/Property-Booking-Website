@@ -99,8 +99,8 @@ const AdminProperties: React.FC = () => {
     <div className="space-y-6 font-poppins">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-bold text-[#1A1A1A]">Property Management</h1>
-          <p className="text-[12px] text-gray-400 mt-0.5">Manage your listings, edit details, and track performance.</p>
+          <h1 className="text-[20px] font-bold text-black">Property Management</h1>
+          <p className="text-[12px] text-black/60 mt-0.5">Manage your listings, edit details, and track performance.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-2">
@@ -119,7 +119,7 @@ const AdminProperties: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-auto h-10 bg-white border border-gray-200 rounded-lg pl-4 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-indigo-500/20 transition-colors cursor-pointer"
+              className="w-full sm:w-auto h-10 bg-white border border-gray-200 rounded-lg pl-4 pr-10 text-[13px] font-medium text-black appearance-none focus:outline-none focus:border-indigo-500/20 transition-colors cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="FOR_SALE">For Sale</option>
@@ -150,7 +150,7 @@ const AdminProperties: React.FC = () => {
                 <img src={p.primaryImage} alt={p.title} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3">
                   <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border ${
-                    p.status === 'FOR_SALE' ? 'bg-indigo-600 text-white border-transparent' : 'bg-white text-[#1A1A1A] border-gray-200'
+                    p.status === 'FOR_SALE' ? 'bg-indigo-600 text-white border-transparent' : 'bg-white text-black border-gray-200'
                   }`}>
                     {statusLabels[p.status]}
                   </span>
@@ -159,7 +159,7 @@ const AdminProperties: React.FC = () => {
 
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <h3 className="text-[14px] font-bold text-[#1A1A1A] leading-tight line-clamp-1">{p.title}</h3>
+                  <h3 className="text-[14px] font-bold text-black leading-tight line-clamp-1">{p.title}</h3>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded shrink-0">
                     <Star size={10} className="fill-current" />
                     {p.rating}
@@ -173,21 +173,21 @@ const AdminProperties: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-2 py-3 border-y border-gray-50 mb-auto">
                   <div className="text-center border-r border-gray-50">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Beds</p>
-                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.bedrooms}</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase mb-0.5">Beds</p>
+                    <p className="text-[13px] font-bold text-black">{p.bedrooms}</p>
                   </div>
                   <div className="text-center border-r border-gray-50">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Baths</p>
-                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.bathrooms}</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase mb-0.5">Baths</p>
+                    <p className="text-[13px] font-bold text-black">{p.bathrooms}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Area</p>
-                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.totalArea}</p>
+                    <p className="text-[10px] text-black/40 font-bold uppercase mb-0.5">Area</p>
+                    <p className="text-[13px] font-bold text-black">{p.totalArea}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-4">
-                   <p className="text-[#1A1A1A] font-bold text-[16px]">
+                   <p className="text-black font-bold text-[16px]">
                     ${p.price.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1">

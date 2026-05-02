@@ -117,12 +117,12 @@ const AdminOverview: React.FC = () => {
             className="bg-white rounded-xl p-5 border border-gray-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[13px] font-medium text-gray-500">{kpi.label}</span>
-              <div className="text-gray-400">{kpi.icon}</div>
+              <span className="text-[13px] font-medium text-black">{kpi.label}</span>
+              <div className="text-black">{kpi.icon}</div>
             </div>
             <div>
-              <h3 className="text-[26px] font-bold text-[#1A1A1A] leading-none mb-2">{kpi.value}</h3>
-              <p className="text-[11px] font-medium text-gray-400">{kpi.change}</p>
+              <h3 className="text-[26px] font-bold text-black leading-none mb-2">{kpi.value}</h3>
+              <p className="text-[11px] font-medium text-black/60">{kpi.change}</p>
             </div>
           </div>
         ))}
@@ -132,8 +132,8 @@ const AdminOverview: React.FC = () => {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <Building2 size={16} className="text-[#1A1A1A]" />
-            <h2 className="text-[14px] font-bold text-[#1A1A1A]">Recent Property Listings</h2>
+            <Building2 size={16} className="text-black" />
+            <h2 className="text-[14px] font-bold text-black">Recent Property Listings</h2>
           </div>
           <Link to="/admin/properties" className="text-[12px] text-indigo-600 font-bold flex items-center gap-1 hover:underline">
             View All <ChevronRight size={14} />
@@ -144,26 +144,26 @@ const AdminOverview: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/30">
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Property</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Location</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Price</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agent</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Created</th>
-                <th className="px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Action</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Property</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Location</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Price</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Status</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Agent</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest">Created</th>
+                <th className="px-6 py-3 text-[10px] font-bold text-black uppercase tracking-widest text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {recentProperties.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/20 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="text-[13px] font-medium text-[#1A1A1A]">{p.title}</span>
+                    <span className="text-[13px] font-medium text-black">{p.title}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[13px] text-gray-500 font-medium">{p.city}</span>
+                    <span className="text-[13px] text-black/60 font-medium">{p.city}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[13px] font-bold text-[#1A1A1A]">${p.price?.toLocaleString()}</span>
+                    <span className="text-[13px] font-bold text-black">${p.price?.toLocaleString()}</span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${
@@ -198,8 +198,8 @@ const AdminOverview: React.FC = () => {
         <div className="lg:col-span-5 bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <Search size={14} className="text-[#1A1A1A]" />
-              <h2 className="text-[14px] font-bold text-[#1A1A1A]">Recent Inquiries</h2>
+              <Search size={14} className="text-black" />
+              <h2 className="text-[14px] font-bold text-black">Recent Inquiries</h2>
             </div>
             <Link to="/admin/bookings" className="text-[11px] text-indigo-600 font-bold hover:underline">View All</Link>
           </div>
@@ -240,8 +240,8 @@ const AdminOverview: React.FC = () => {
         <div className="lg:col-span-7 bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <TrendingUp size={14} className="text-[#1A1A1A]" />
-              <h2 className="text-[14px] font-bold text-[#1A1A1A]">Performance Metrics</h2>
+              <TrendingUp size={14} className="text-black" />
+              <h2 className="text-[14px] font-bold text-black">Performance Metrics</h2>
             </div>
             <button className="text-[11px] text-indigo-600 font-bold hover:underline">View All</button>
           </div>

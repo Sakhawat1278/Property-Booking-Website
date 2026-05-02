@@ -92,8 +92,8 @@ const AdminUsers: React.FC = () => {
     <div className="space-y-6 font-poppins">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[20px] font-bold text-[#1A1A1A]">User Management</h1>
-          <p className="text-[12px] text-gray-400 mt-0.5">Manage system administrators, agents, and platform users.</p>
+          <h1 className="text-[20px] font-bold text-black">User Management</h1>
+          <p className="text-[12px] text-black/60 mt-0.5">Manage system administrators, agents, and platform users.</p>
         </div>
         <button className="h-9 px-4 bg-indigo-600 text-white rounded-lg text-[13px] font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all">
           <UserPlus size={16} />
@@ -134,11 +134,11 @@ const AdminUsers: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/30 border-b border-gray-200">
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">User Details</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joined</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-black uppercase tracking-widest">User Details</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-black uppercase tracking-widest">Role</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-black uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-black uppercase tracking-widest">Joined</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-black uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -150,8 +150,8 @@ const AdminUsers: React.FC = () => {
                         <UserIcon size={16} />
                       </div>
                       <div>
-                        <p className="text-[13px] font-bold text-[#1A1A1A]">{profile.name || 'Anonymous'}</p>
-                        <p className="text-[11px] text-gray-400 font-medium">{profile.email}</p>
+                        <p className="text-[13px] font-bold text-black">{profile.name || 'Anonymous'}</p>
+                        <p className="text-[11px] text-black/60 font-medium">{profile.email}</p>
                       </div>
                     </div>
                   </td>
