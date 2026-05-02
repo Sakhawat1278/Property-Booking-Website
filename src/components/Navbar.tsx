@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ArrowUpRight, Menu, X, User } from 'lucide-react';
+import { 
+  ChevronDown, ArrowUpRight, Menu, X, User, 
+  LogOut, LayoutDashboard, Settings, ShieldCheck
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,8 +18,32 @@ const navItems = [
 const Navbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setUserDropdownOpen(false);
+    navigate('/');
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return '/login';
+    return user.role === 'ADMIN' ? '/admin' : user.role === 'AGENCY' ? '/agency' : '/';
+  };
 
   return (
     <>
@@ -62,20 +89,79 @@ const Navbar = () => {
         </div>
 
         {/* Desktop CTA */}
-        <div className="hidden lg:block pointer-events-auto">
+        <div className="hidden lg:block pointer-events-auto relative" ref={dropdownRef}>
           {user ? (
-            <Link to="/admin">
+            <div className="relative">
               <motion.button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative flex items-center gap-3 bg-gray-50 text-[#1A1A1A] pl-1 pr-6 h-10 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-all overflow-hidden"
+                className={`group relative flex items-center gap-3 bg-gray-50 text-[#1A1A1A] pl-1 pr-4 h-10 rounded-full border transition-all overflow-hidden ${userDropdownOpen ? 'border-brand ring-4 ring-brand/5 bg-white' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-100'}`}
               >
                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[13px] shrink-0">
                   {user.name?.charAt(0).toUpperCase() || 'A'}
                 </div>
                 <span className="text-[14px] font-medium truncate max-w-[100px]">{user.name}</span>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
               </motion.button>
-            </Link>
+
+              <AnimatePresence>
+                {userDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden py-2 z-[60]"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                       <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[13px] font-bold text-gray-900">{user.name}</span>
+                          {user.role === 'ADMIN' && <ShieldCheck size={12} className="text-brand" />}
+                       </div>
+                       <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
+                    </div>
+
+                    <Link 
+                      to={getDashboardPath()} 
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors"
+                    >
+                      <LayoutDashboard size={16} />
+                      Dashboard
+                    </Link>
+
+                    <Link 
+                      to={`${getDashboardPath()}/profile`} 
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors"
+                    >
+                      <User size={16} />
+                      Profile Settings
+                    </Link>
+
+                    <Link 
+                      to={`${getDashboardPath()}/settings`} 
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors"
+                    >
+                      <Settings size={16} />
+                      Account Settings
+                    </Link>
+
+                    <div className="h-px bg-gray-50 my-1 mx-2" />
+
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <Link to="/login">
               <motion.button
@@ -100,12 +186,15 @@ const Navbar = () => {
         {/* Mobile: Sign in + Hamburger */}
         <div className="flex items-center gap-2 lg:hidden">
           {user ? (
-            <Link to="/admin" className="h-9 pl-1 pr-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-[#1A1A1A] rounded-full flex items-center gap-2 transition-colors">
+            <button 
+              onClick={() => setMobileOpen(true)}
+              className="h-9 pl-1 pr-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-[#1A1A1A] rounded-full flex items-center gap-2 transition-colors"
+            >
                <div className="w-7 h-7 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[12px] shrink-0">
                   {user.name?.charAt(0).toUpperCase() || 'A'}
                 </div>
                 <span className="text-[13px] font-medium truncate max-w-[80px]">{user.name?.split(' ')[0]}</span>
-            </Link>
+            </button>
           ) : (
             <Link to="/login" className="h-9 px-4 bg-brand text-white text-[13px] font-medium rounded-full flex items-center">
               Sign in
@@ -139,12 +228,33 @@ const Navbar = () => {
               className="fixed right-0 top-0 bottom-0 w-72 bg-white z-[70] lg:hidden flex flex-col"
             >
               <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                <span className="text-[18px] font-bold text-brand">Nestory</span>
+                <span className="text-[18px] font-bold text-brand uppercase tracking-tight">Nestory</span>
                 <button onClick={() => setMobileOpen(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
                   <X size={20} />
                 </button>
               </div>
               <nav className="flex-1 p-4 flex flex-col gap-1">
+                {user && (
+                   <div className="p-4 mb-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div className="flex items-center gap-3 mb-4">
+                         <div className="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-bold">
+                            {user.name?.charAt(0).toUpperCase()}
+                         </div>
+                         <div>
+                            <p className="text-[14px] font-bold text-gray-900">{user.name}</p>
+                            <p className="text-[11px] text-gray-400">{user.email}</p>
+                         </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                         <Link to={getDashboardPath()} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 p-2 text-[13px] font-medium text-gray-700">
+                            <LayoutDashboard size={14} className="text-gray-400" /> Dashboard
+                         </Link>
+                         <Link to={`${getDashboardPath()}/profile`} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 p-2 text-[13px] font-medium text-gray-700">
+                            <User size={14} className="text-gray-400" /> Profile
+                         </Link>
+                      </div>
+                   </div>
+                )}
                 {navItems.map((item) => (
                   <Link
                     key={item.label}
@@ -158,14 +268,12 @@ const Navbar = () => {
               </nav>
               <div className="p-4 border-t border-gray-100">
                 {user ? (
-                  <Link to="/admin" onClick={() => setMobileOpen(false)}>
-                    <button className="w-full h-11 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-[#1A1A1A] rounded-full text-[14px] font-medium flex items-center justify-center gap-2 transition-colors">
-                       <div className="w-7 h-7 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-[12px]">
-                          {user.name?.charAt(0).toUpperCase() || 'A'}
-                       </div>
-                       Go to Dashboard
-                    </button>
-                  </Link>
+                   <button 
+                    onClick={handleLogout}
+                    className="w-full h-11 bg-red-50 text-red-600 rounded-full text-[14px] font-bold flex items-center justify-center gap-2 transition-colors"
+                   >
+                     <LogOut size={16} /> Sign Out
+                   </button>
                 ) : (
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <button className="w-full h-11 bg-brand text-white rounded-full text-[14px] font-medium">
