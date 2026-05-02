@@ -14,9 +14,33 @@ const AdminRegister: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password || !name) return;
     setLoading(true);
 
     try {
+      // Connection check
+      try {
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
+          method: 'GET',
+          headers: { 'apikey': supabase.supabaseKey }
+        });
+        if (!response.ok && response.status !== 404) {
+          throw new Error('Supabase project unreachable');
+        }
+      } catch (e) {
+        setLoading(false);
+        toast.error('Network error: Cannot reach Supabase. Check your internet.');
+        return;
+      }
+
+      // Safety timeout for the UI
+      const registerTimeout = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+          toast.error('Registration timed out. Please try again.');
+        }
+      }, 8000);
+
       // 1. Sign up user via Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -29,7 +53,12 @@ const AdminRegister: React.FC = () => {
         }
       });
 
-      if (error) throw error;
+      clearTimeout(registerTimeout);
+
+      if (error) {
+        console.error('Registration error:', error);
+        throw error;
+      }
 
       if (data.user) {
         // 2. Explicitly update profile role just in case trigger is slow
