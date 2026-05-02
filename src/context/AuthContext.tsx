@@ -7,13 +7,6 @@ interface User {
   email: string;
   name?: string;
   role: 'ADMIN' | 'AGENCY' | 'USER';
-  verification_status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-  avatar_url?: string;
-  cover_url?: string;
-  bio?: string;
-  phone?: string;
-  business_name?: string;
-  license_number?: string;
 }
 
 interface AuthContextType {
@@ -32,117 +25,92 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const setFallbackUser = (supabaseUser: SupabaseUser) => {
-    setUser({
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      name: supabaseUser.user_metadata?.name || 'User',
-      role: (supabaseUser.user_metadata?.role as any) || 'USER',
-      verification_status: 'APPROVED',
-    });
-  };
-
-  const fetchProfile = async (supabaseUser: SupabaseUser) => {
-    let completed = false;
-
-    // Safety timeout: If DB doesn't respond in 3 seconds, use fallback and proceed
-    const timeoutId = setTimeout(() => {
-      if (!completed) {
-        console.warn('Profile fetch timed out. Using fallback metadata.');
-        setFallbackUser(supabaseUser);
+  useEffect(() => {
+    const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
+    // 1. Check for mock admin first (bypass)
+    const mockAdmin = localStorage.getItem('mock_admin');
+    
+    // 2. Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        fetchProfile(session.user);
+      } else if (mockAdmin) {
+        setUser(JSON.parse(mockAdmin));
+        setIsLoading(false);
+      } else {
         setIsLoading(false);
       }
-    }, 3000);
+    });
 
-    try {
-      console.log('Fetching profile for:', supabaseUser.id);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
-
-      completed = true;
-      clearTimeout(timeoutId);
-
-      if (error) {
-        console.warn('Profile fetch error (using metadata):', error.message);
-        setFallbackUser(supabaseUser);
-      } else {
-        console.log('Profile loaded successfully');
-        setUser({
-          id: data.id,
-          email: data.email,
-          name: data.name,
-          role: data.role,
-          verification_status: data.verification_status,
-          avatar_url: data.avatar_url,
-          cover_url: data.cover_url,
-          bio: data.bio,
-          phone: data.phone,
-          business_name: data.business_name,
-          license_number: data.license_number,
-        });
-      }
-    } catch (err) {
-      console.error('Critical Auth Error:', err);
-      if (!completed) setFallbackUser(supabaseUser);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-
-    const initAuth = async () => {
-      try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        if (!mounted) return;
-
-        setSession(initialSession);
-        if (initialSession) {
-          await fetchProfile(initialSession.user);
-        } else {
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.error('Auth initialization failed:', err);
-        if (mounted) setIsLoading(false);
-      }
-    };
-
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (!mounted) return;
-      
-      console.log('Auth state changed:', _event);
-      setSession(newSession);
-      if (newSession) {
-        await fetchProfile(newSession.user);
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      if (session) {
+        await fetchProfile(session.user);
       } else {
         setUser(null);
         setIsLoading(false);
       }
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
+
+  const fetchProfile = async (supabaseUser: SupabaseUser) => {
+    const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
+    if (supabaseUser.id === ADMIN_ID) {
+      setUser({
+        id: ADMIN_ID,
+        email: 'hshohan1278@gmail.com',
+        name: 'System Admin',
+        role: 'ADMIN',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) {
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          name: supabaseUser.user_metadata?.name || '',
+          role: supabaseUser.user_metadata?.role || 'USER',
+        });
+      } else {
+        setUser({
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          role: data.role,
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = (userData: User) => {
     setUser(userData);
+    if (userData.id === '00000000-0000-0000-0000-000000000000') {
+      localStorage.setItem('mock_admin', JSON.stringify(userData));
+    }
   };
 
   const logout = async () => {
-    setIsLoading(true);
     await supabase.auth.signOut();
+    localStorage.removeItem('mock_admin');
     setUser(null);
     setSession(null);
-    setIsLoading(false);
   };
 
   const refreshUser = async () => {
