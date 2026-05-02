@@ -28,44 +28,66 @@ const AdminOverview: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchDashboardData())
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Safety timeout: If data fetching takes more than 5 seconds, force stop the loading spinner
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
+    return () => { 
+      supabase.removeChannel(channel);
+      clearTimeout(timer);
+    };
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
+      if (!loading) setLoading(true);
+      console.log('--- Dashboard Fetch Cycle Started ---');
       
       // 1. Fetch Real Counts
-      const { count: propsCount } = await supabase.from('properties').select('*', { count: 'exact', head: true });
-      const { count: inquiriesCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('type', 'VIEWING');
-      const { count: agentsCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'AGENCY');
+      console.log('Fetching Counts...');
+      const { count: propsCount, error: propsErr } = await supabase.from('properties').select('*', { count: 'exact', head: true });
+      if (propsErr) console.error('!! Props count error:', propsErr);
+
+      const { count: inquiriesCount, error: inqErr } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('type', 'VIEWING');
+      if (inqErr) console.error('!! Inquiries count error:', inqErr);
+
+      const { count: agentsCount, error: agentErr } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'AGENCY');
+      if (agentErr) console.error('!! Agents count error:', agentErr);
       
-      // 2. Fetch Total Revenue (Sum of confirmed bookings)
-      const { data: revenueData } = await supabase
+      setStats(prev => ({
+        ...prev,
+        total: propsCount || 0, 
+        inquiries: inquiriesCount || 0,
+        agents: agentsCount || 0
+      }));
+
+      // 2. Fetch Total Revenue
+      console.log('Fetching Revenue...');
+      const { data: revenueData, error: revErr } = await supabase
         .from('bookings')
         .select('total_amount')
         .eq('status', 'CONFIRMED');
       
+      if (revErr) console.error('!! Revenue fetch error:', revErr);
       const totalRevenue = revenueData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0;
 
-      setStats({
-        total: propsCount || 0, 
-        inquiries: inquiriesCount || 0,
-        agents: agentsCount || 0,
-        revenue: totalRevenue
-      });
+      setStats(prev => ({ ...prev, revenue: totalRevenue }));
 
       // 3. Fetch Recent Properties
-      const { data: recent } = await supabase
+      console.log('Fetching Recent Properties...');
+      const { data: recent, error: recentPropsErr } = await supabase
         .from('properties')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
       
+      if (recentPropsErr) console.error('!! Recent props error:', recentPropsErr);
       setRecentProperties(recent || []);
 
-      // 4. Fetch Recent Inquiries (VIEWING requests)
-      const { data: inquiries } = await supabase
+      // 4. Fetch Recent Inquiries
+      console.log('Fetching Recent Inquiries...');
+      const { data: inquiries, error: recentInqErr } = await supabase
         .from('bookings')
         .select(`
           *,
@@ -75,10 +97,12 @@ const AdminOverview: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(4);
       
+      if (recentInqErr) console.error('!! Recent inquiries error:', recentInqErr);
       setRecentInquiries(inquiries || []);
-
+      
+      console.log('--- Dashboard Fetch Cycle Completed ---');
     } catch (err: any) {
-      console.error('Dashboard fetch error:', err.message);
+      console.error('!!! Dashboard Fatal Error:', err);
     } finally {
       setLoading(false);
     }

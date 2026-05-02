@@ -7,6 +7,7 @@ interface User {
   email: string;
   name?: string;
   role: 'ADMIN' | 'AGENCY' | 'USER';
+  verification_status?: string;
 }
 
 interface AuthContextType {
@@ -26,18 +27,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
-    // 1. Check for mock admin first (bypass)
-    const mockAdmin = localStorage.getItem('mock_admin');
-    
-    // 2. Get initial session
+    // 0. Emergency Cleanup: Clear legacy mock admin data
+    localStorage.removeItem('mock_admin');
+
+    // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         fetchProfile(session.user);
-      } else if (mockAdmin) {
-        setUser(JSON.parse(mockAdmin));
-        setIsLoading(false);
       } else {
         setIsLoading(false);
       }
@@ -49,12 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session) {
         await fetchProfile(session.user);
       } else {
-        const mockAdmin = localStorage.getItem('mock_admin');
-        if (!mockAdmin) {
-          setUser(null);
-        } else {
-          setUser(JSON.parse(mockAdmin));
-        }
+        setUser(null);
         setIsLoading(false);
       }
     });
@@ -63,18 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProfile = async (supabaseUser: SupabaseUser) => {
-    const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
-    if (supabaseUser.id === ADMIN_ID) {
-      setUser({
-        id: ADMIN_ID,
-        email: 'hshohan1278@gmail.com',
-        name: 'System Admin',
-        role: 'ADMIN',
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -83,11 +63,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
+        // Fallback to metadata if profile doesn't exist yet
         setUser({
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           name: supabaseUser.user_metadata?.name || '',
           role: supabaseUser.user_metadata?.role || 'USER',
+          verification_status: supabaseUser.user_metadata?.verification_status || 'PENDING',
         });
       } else {
         setUser({
@@ -95,6 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: data.email,
           name: data.name,
           role: data.role,
+          verification_status: data.verification_status,
         });
       }
     } catch (err) {
@@ -106,15 +89,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (userData: User) => {
     setUser(userData);
-    setIsLoading(false);
-    if (userData.id === '00000000-0000-0000-0000-000000000000') {
-      localStorage.setItem('mock_admin', JSON.stringify(userData));
-    }
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('mock_admin');
+    localStorage.removeItem('mock_admin'); // Force clear legacy data
     setUser(null);
     setSession(null);
   };
