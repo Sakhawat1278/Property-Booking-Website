@@ -233,3 +233,13 @@ BEGIN
       FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
   END IF;
 END $$;
+
+-- 8. ENABLE REALTIME
+-- This ensures that the dashboard updates instantly when data changes
+BEGIN;
+  -- Remove existing publication if any to avoid errors on re-run
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  
+  -- Create publication for all tables we want to track
+  CREATE PUBLICATION supabase_realtime FOR TABLE profiles, properties, bookings;
+COMMIT;
