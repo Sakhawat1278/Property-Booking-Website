@@ -15,32 +15,20 @@ const AdminRegister: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !name) return;
+    
+    console.log('--- ADMIN REGISTRATION START ---');
+    console.log('Email:', email);
     setLoading(true);
 
+    // Global Safety Timeout - Reset UI after 10 seconds no matter what
+    const globalTimeout = setTimeout(() => {
+      setLoading(false);
+      console.warn('!!! Global Registration Timeout Triggered !!!');
+    }, 10000);
+
     try {
-      // Connection check using the SDK itself
-      try {
-        const { error: pingError } = await supabase.from('profiles').select('id', { count: 'exact', head: true }).limit(1);
-        if (pingError && pingError.code !== 'PGRST116') {
-          if (pingError.message.includes('Failed to fetch')) {
-            throw new Error('Supabase unreachable');
-          }
-        }
-      } catch (e) {
-        setLoading(false);
-        toast.error('Network error: Cannot reach Supabase. Check your internet.');
-        return;
-      }
-
-      // Safety timeout for the UI
-      const registerTimeout = setTimeout(() => {
-        if (loading) {
-          setLoading(false);
-          toast.error('Registration timed out. Please try again.');
-        }
-      }, 8000);
-
       // 1. Sign up user via Supabase Auth
+      console.log('Calling supabase.auth.signUp...');
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -52,38 +40,59 @@ const AdminRegister: React.FC = () => {
         }
       });
 
-      clearTimeout(registerTimeout);
+      console.log('signUp Response Received:', { hasData: !!data, hasUser: !!data?.user, hasError: !!error });
 
       if (error) {
-        console.error('Registration error:', error);
-        throw error;
+        console.error('Registration Error:', error);
+        toast.error(error.message);
+        clearTimeout(globalTimeout);
+        setLoading(false);
+        return;
       }
 
       if (data.user) {
+        console.log('User created successfully. User ID:', data.user.id);
+        
         // Check if we need to verify email
         if (!data.session) {
-          toast.success('Admin account initialized! Please check your email to verify your account before logging in.', {
-            duration: 8000
-          });
+          console.log('Email verification required. Session is null.');
+          toast.success('Admin account initialized! Please check your email to verify your account.');
+          clearTimeout(globalTimeout);
           setLoading(false);
           return;
         }
 
+        console.log('Session created. Updating profile role...');
         // 2. If already authenticated (auto-confirm is on), update profile role
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ role: 'ADMIN', verification_status: 'APPROVED' })
+          .update({ 
+            role: 'ADMIN', 
+            verification_status: 'APPROVED',
+            name: name
+          })
           .eq('id', data.user.id);
         
-        if (profileError) console.warn('Profile role update warning:', profileError);
+        if (profileError) {
+          console.warn('Profile role update warning:', profileError);
+        } else {
+          console.log('Profile updated to ADMIN successfully.');
+        }
 
         toast.success('Admin account created successfully!');
+        clearTimeout(globalTimeout);
         navigate('/login');
+      } else {
+        console.warn('SignUp finished but no user returned.');
+        toast.error('Registration failed. No user object returned.');
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error('CRITICAL REGISTRATION FATAL ERROR:', err);
+      toast.error('Fatal error: ' + (err.message || 'Check console'));
     } finally {
+      clearTimeout(globalTimeout);
       setLoading(false);
+      console.log('--- ADMIN REGISTRATION END ---');
     }
   };
 
