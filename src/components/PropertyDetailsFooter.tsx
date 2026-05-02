@@ -44,7 +44,7 @@ const PropertyDetailsFooter = () => {
             <div className="flex flex-col gap-5">
               <h3 className="text-[14px] font-bold text-[#1A1A1A] uppercase tracking-wider">Buy, Rent and Sell</h3>
               <ul className="flex flex-col gap-3">
-                {['Buy and sell properties', 'Rent home', 'Builder trade-up'].map((link) => (
+                {['Buy and sell properties', 'Rent home', 'Agency & Developer program'].map((link) => (
                   <li key={link}>
                     <a href="#" className="text-[14px] text-gray-500 hover:text-brand transition-colors">{link}</a>
                   </li>

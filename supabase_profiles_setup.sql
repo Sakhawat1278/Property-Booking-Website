@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "profiles" (
     "name" text,
     "email" text,
     "phone" text,
-    "role" text DEFAULT 'USER', -- ADMIN, OWNER, BUILDER, USER
+    "role" text DEFAULT 'USER', -- ADMIN, AGENCY, USER
     "business_name" text,
     "address" text,
     "license_number" text,
