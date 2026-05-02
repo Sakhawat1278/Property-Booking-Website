@@ -46,18 +46,18 @@ const Login = () => {
     try {
       console.log('Attempting login for:', email);
       
-      // Connection check
+      // Connection check using the SDK itself (more reliable than raw fetch)
       try {
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
-          method: 'GET',
-          headers: { 'apikey': supabase.supabaseKey }
-        });
-        if (!response.ok && response.status !== 404) {
-          throw new Error('Supabase project unreachable');
+        const { error: pingError } = await supabase.from('profiles').select('id', { count: 'exact', head: true }).limit(1);
+        if (pingError && pingError.code !== 'PGRST116' && pingError.message !== 'JSON object requested, multiple (or no) rows returned') {
+          // We ignore "no rows" errors as that just means the table is empty
+          if (pingError.message.includes('Failed to fetch')) {
+            throw new Error('Supabase unreachable');
+          }
         }
       } catch (e) {
         setLoading(false);
-        toast.error('Network error: Cannot reach Supabase. Check your project URL or internet connection.');
+        toast.error('Network error: Cannot reach Supabase. Check your internet or VITE_SUPABASE_URL.');
         return;
       }
 

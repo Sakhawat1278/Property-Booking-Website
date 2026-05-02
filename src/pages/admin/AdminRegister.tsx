@@ -18,14 +18,13 @@ const AdminRegister: React.FC = () => {
     setLoading(true);
 
     try {
-      // Connection check
+      // Connection check using the SDK itself
       try {
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
-          method: 'GET',
-          headers: { 'apikey': supabase.supabaseKey }
-        });
-        if (!response.ok && response.status !== 404) {
-          throw new Error('Supabase project unreachable');
+        const { error: pingError } = await supabase.from('profiles').select('id', { count: 'exact', head: true }).limit(1);
+        if (pingError && pingError.code !== 'PGRST116') {
+          if (pingError.message.includes('Failed to fetch')) {
+            throw new Error('Supabase unreachable');
+          }
         }
       } catch (e) {
         setLoading(false);
@@ -61,7 +60,16 @@ const AdminRegister: React.FC = () => {
       }
 
       if (data.user) {
-        // 2. Explicitly update profile role just in case trigger is slow
+        // Check if we need to verify email
+        if (!data.session) {
+          toast.success('Admin account initialized! Please check your email to verify your account before logging in.', {
+            duration: 8000
+          });
+          setLoading(false);
+          return;
+        }
+
+        // 2. If already authenticated (auto-confirm is on), update profile role
         const { error: profileError } = await supabase
           .from('profiles')
           .update({ role: 'ADMIN', verification_status: 'APPROVED' })
