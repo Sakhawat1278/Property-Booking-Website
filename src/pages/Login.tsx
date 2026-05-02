@@ -37,9 +37,6 @@ const Login = () => {
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
-  // ── Hardcoded Admin Credentials ─────────────────────────────────────────
-  const ADMIN_EMAIL = 'hshohan1278@gmail.com';
-  const ADMIN_PASSWORD = 'Sohclash123';
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -51,13 +48,6 @@ const Login = () => {
     setLoading(true);
     
     try {
-      // Check for hardcoded admin credentials first for legacy access
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        authLogin({ id: 'admin-001', email, name: 'Admin', role: 'ADMIN' });
-        toast.success('Welcome back, Admin!');
-        navigate('/admin');
-        return;
-      }
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -70,7 +60,7 @@ const Login = () => {
       
       // Check role from metadata or profile
       const userRole = data.user.user_metadata?.role || 'USER';
-      if (userRole === 'ADMIN' || email === ADMIN_EMAIL) {
+      if (userRole === 'ADMIN') {
         navigate('/admin');
       } else if (userRole === 'AGENCY') {
         navigate('/agency');

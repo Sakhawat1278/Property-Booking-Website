@@ -15,6 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (user: User) => void;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,29 +26,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Check for mock admin first (bypass)
-    const mockAdmin = localStorage.getItem('mock_admin');
-    
-    // 2. Get initial session
+    // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         fetchProfile(session.user);
-      } else if (mockAdmin) {
-        setUser(JSON.parse(mockAdmin));
-        setIsLoading(false);
       } else {
         setIsLoading(false);
       }
     });
 
-    // 3. Listen for auth changes
+    // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session) {
-        localStorage.removeItem('mock_admin');
         await fetchProfile(session.user);
-      } else if (!localStorage.getItem('mock_admin')) {
+      } else {
         setUser(null);
         setIsLoading(false);
       }
@@ -88,18 +82,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem('mock_admin', JSON.stringify(userData));
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('mock_admin');
     setUser(null);
     setSession(null);
   };
 
+  const refreshUser = async () => {
+    if (session?.user) {
+      await fetchProfile(session.user);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, session, isLoading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
