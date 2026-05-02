@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '../lib/supabase';
 
 // Inline SVG Components for compatibility
 const IconArrowLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
@@ -43,49 +44,82 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
     setLoading(true);
     
-    // Simulate API delay
-    setTimeout(() => {
-      if (email && password) {
-        // Check for hardcoded admin credentials first
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-          authLogin({
-            user: { id: 'admin-001', email, name: 'Admin', role: 'ADMIN' },
-            token: 'admin-token-' + Date.now()
-          });
-          toast.success('Welcome back, Admin!');
-          navigate('/admin');
-        } else if (email !== ADMIN_EMAIL && email.includes('@')) {
-          authLogin({
-            user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
-            token: 'mock-token-' + Date.now()
-          });
-          toast.success('Login successful!');
-          navigate('/');
-        } else {
-          toast.error('Invalid email or password');
-        }
-      } else {
-        toast.error('Please enter both email and password');
+    try {
+      // Check for hardcoded admin credentials first for legacy access
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // We'll still try to log in via Supabase if this user exists there
+        // but for now let's just use the real Supabase sign in
       }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
+      toast.success('Welcome back!');
+      
+      // Check role from metadata or profile
+      const userRole = data.user.user_metadata?.role || 'USER';
+      if (userRole === 'ADMIN' || email === ADMIN_EMAIL) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Invalid email or password');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password || !name) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
     setLoading(true);
 
-    setTimeout(() => {
-      authLogin({
-        user: { id: Date.now().toString(), email, name, role },
-        token: 'mock-token-' + Date.now()
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+            phone,
+            business_name: businessName,
+            address,
+            license_number: licenseNumber,
+            website,
+            experience
+          }
+        }
       });
-      toast.success('Account created successfully!');
-      navigate('/');
+
+      if (error) throw error;
+      
+      if (data.session) {
+        toast.success('Account created successfully!');
+        navigate('/');
+      } else {
+        toast.info('Please check your email for the verification link');
+        setMode('login');
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const containerVariants = {

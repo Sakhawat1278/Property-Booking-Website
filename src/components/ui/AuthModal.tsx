@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { toast } from 'sonner';
 
 // SVGs from Login.tsx
 const IconArrowLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
@@ -44,19 +46,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     setError('');
     setLoading(true);
     
-    setTimeout(() => {
-      if (email && password) {
-        authLogin({
-          user: { id: '1', email, name: email.split('@')[0], role: 'USER' },
-          token: 'mock-token-' + Date.now()
-        });
-        if (onSuccess) onSuccess();
-        onClose();
-      } else {
-        setError('Invalid credentials');
-      }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
+      toast.success('Login successful!');
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Invalid credentials');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -64,15 +69,38 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      authLogin({
-        user: { id: Date.now().toString(), email, name, role },
-        token: 'mock-token-' + Date.now()
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+            phone,
+            business_name: businessName,
+            address,
+            license_number: licenseNumber,
+            website
+          }
+        }
       });
-      if (onSuccess) onSuccess();
-      onClose();
+
+      if (error) throw error;
+      
+      if (data.session) {
+        toast.success('Account created successfully!');
+        if (onSuccess) onSuccess();
+        onClose();
+      } else {
+        toast.info('Please check your email for the verification link');
+        setMode('login');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
