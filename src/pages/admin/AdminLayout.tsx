@@ -44,7 +44,7 @@ const AdminLayout: React.FC = () => {
   const currentPathName = navItems.find(item => item.to === location.pathname)?.label || 'Dashboard';
 
   const Sidebar = () => (
-    <aside className="w-[240px] bg-white border-r border-gray-100 h-full flex flex-col shrink-0 font-poppins">
+    <aside className="w-[240px] bg-white border-r border-gray-200 h-full flex flex-col shrink-0 font-poppins">
       {/* Brand matching Listora style */}
       <div className="p-6 pb-2">
         <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ const AdminLayout: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#FBFCFE]">
         {/* Top Bar - No Shadow, Slick Borders */}
-        <header className="h-[64px] bg-white border-b border-gray-100 flex items-center justify-between px-6 gap-6 shrink-0 relative z-30">
+        <header className="h-[64px] bg-white border-b border-gray-200 flex items-center justify-between px-6 gap-6 shrink-0 relative z-30">
           <div className="flex items-center gap-4 flex-1">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -150,7 +150,7 @@ const AdminLayout: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Search properties, agents, tenants..."
-                  className="w-full h-9 bg-gray-50/50 border border-gray-100 focus:bg-white focus:border-indigo-500/20 rounded-lg pl-10 pr-10 text-[13px] focus:outline-none transition-all placeholder:text-gray-300"
+                  className="w-full h-9 bg-gray-50/50 border border-gray-200 focus:bg-white focus:border-indigo-500/20 rounded-lg pl-10 pr-10 text-[13px] focus:outline-none transition-all placeholder:text-gray-300"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-20">
                   <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[9px] font-bold">⌘</kbd>

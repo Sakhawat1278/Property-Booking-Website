@@ -111,7 +111,7 @@ const AdminProperties: React.FC = () => {
               placeholder="Search properties..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-10 bg-white border border-gray-100 rounded-lg pl-10 pr-4 text-[13px] focus:outline-none focus:border-indigo-500/20 transition-all"
+              className="w-full h-10 bg-white border border-gray-200 rounded-lg pl-10 pr-4 text-[13px] focus:outline-none focus:border-indigo-500/20 transition-all"
             />
           </div>
 
@@ -119,7 +119,7 @@ const AdminProperties: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-auto h-10 bg-white border border-gray-100 rounded-lg pl-4 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-indigo-500/20 transition-colors cursor-pointer"
+              className="w-full sm:w-auto h-10 bg-white border border-gray-200 rounded-lg pl-4 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-indigo-500/20 transition-colors cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="FOR_SALE">For Sale</option>
@@ -144,7 +144,7 @@ const AdminProperties: React.FC = () => {
           {filtered.map((p) => (
             <div
               key={p.id}
-              className="bg-white rounded-xl border border-gray-100 overflow-hidden group transition-colors flex flex-col"
+              className="bg-white rounded-xl border border-gray-200 overflow-hidden group transition-colors flex flex-col"
             >
               <div className="relative h-44 overflow-hidden bg-gray-50 shrink-0">
                 <img src={p.primaryImage} alt={p.title} className="w-full h-full object-cover" />

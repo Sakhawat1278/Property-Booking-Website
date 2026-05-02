@@ -112,14 +112,14 @@ const AdminUsers: React.FC = () => {
             className="w-full h-10 pl-10 pr-4 bg-white border border-gray-100 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500/20 transition-all placeholder:text-gray-300"
           />
         </div>
-        <div className="flex gap-2 bg-gray-50/50 p-1 rounded-lg border border-gray-100">
+        <div className="flex gap-2 bg-gray-50/50 p-1 rounded-lg border border-gray-200">
           {['ALL', 'ADMIN', 'AGENCY', 'USER'].map(r => (
             <button
               key={r}
               onClick={() => setRoleFilter(r)}
               className={`px-3 h-8 rounded-md text-[11px] font-bold transition-all ${
                 roleFilter === r
-                  ? 'bg-white text-[#1A1A1A] border border-gray-100'
+                  ? 'bg-white text-[#1A1A1A] border border-gray-200'
                   : 'text-gray-400 hover:text-[#1A1A1A]'
               }`}
             >
@@ -129,11 +129,11 @@ const AdminUsers: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/30 border-b border-gray-100">
+              <tr className="bg-gray-50/30 border-b border-gray-200">
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">User Details</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>

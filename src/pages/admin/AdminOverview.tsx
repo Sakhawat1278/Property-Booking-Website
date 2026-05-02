@@ -114,7 +114,7 @@ const AdminOverview: React.FC = () => {
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="bg-white rounded-xl p-5 border border-gray-100 flex flex-col justify-between"
+            className="bg-white rounded-xl p-5 border border-gray-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-[13px] font-medium text-gray-500">{kpi.label}</span>
@@ -129,8 +129,8 @@ const AdminOverview: React.FC = () => {
       </div>
 
       {/* Main Table Section - Slick Style */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Building2 size={16} className="text-[#1A1A1A]" />
             <h2 className="text-[14px] font-bold text-[#1A1A1A]">Recent Property Listings</h2>
@@ -195,8 +195,8 @@ const AdminOverview: React.FC = () => {
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Recent Inquiries */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="lg:col-span-5 bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Search size={14} className="text-[#1A1A1A]" />
               <h2 className="text-[14px] font-bold text-[#1A1A1A]">Recent Inquiries</h2>
@@ -237,8 +237,8 @@ const AdminOverview: React.FC = () => {
         </div>
 
         {/* Performance Metrics Chart */}
-        <div className="lg:col-span-7 bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="lg:col-span-7 bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <TrendingUp size={14} className="text-[#1A1A1A]" />
               <h2 className="text-[14px] font-bold text-[#1A1A1A]">Performance Metrics</h2>
