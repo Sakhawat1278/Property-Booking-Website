@@ -32,12 +32,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const setFallbackUser = (supabaseUser: SupabaseUser) => {
+    setUser({
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      name: supabaseUser.user_metadata?.name || 'User',
+      role: (supabaseUser.user_metadata?.role as any) || 'USER',
+      verification_status: 'APPROVED',
+    });
+  };
+
   const fetchProfile = async (supabaseUser: SupabaseUser) => {
-    // Safety timeout to prevent permanent loading screens
+    let completed = false;
+
+    // Safety timeout: If DB doesn't respond in 3 seconds, use fallback and proceed
     const timeoutId = setTimeout(() => {
-      console.warn('Profile fetch timed out. Using fallback metadata.');
-      setIsLoading(false);
-    }, 5000);
+      if (!completed) {
+        console.warn('Profile fetch timed out. Using fallback metadata.');
+        setFallbackUser(supabaseUser);
+        setIsLoading(false);
+      }
+    }, 3000);
 
     try {
       console.log('Fetching profile for:', supabaseUser.id);
@@ -47,15 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', supabaseUser.id)
         .single();
 
+      completed = true;
+      clearTimeout(timeoutId);
+
       if (error) {
         console.warn('Profile fetch error (using metadata):', error.message);
-        setUser({
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          name: supabaseUser.user_metadata?.name || '',
-          role: supabaseUser.user_metadata?.role || 'USER',
-          verification_status: 'APPROVED', // Assume approved if profile missing for now
-        });
+        setFallbackUser(supabaseUser);
       } else {
         console.log('Profile loaded successfully');
         setUser({
@@ -74,8 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Critical Auth Error:', err);
+      if (!completed) setFallbackUser(supabaseUser);
     } finally {
-      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
