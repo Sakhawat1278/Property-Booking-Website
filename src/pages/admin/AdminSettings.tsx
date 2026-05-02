@@ -6,14 +6,17 @@ import {
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 
+import { useAuth } from '../../context/AuthContext';
+
 const AdminSettings: React.FC = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<any>({
-    general: { site_title: '', admin_email: '', support_phone: '' },
-    security: { mfa_enabled: false, password_policy: '', session_timeout: '' },
+    general: { admin_email: '', support_phone: '' },
+    security: { mfa_enabled: false, password_policy: 'STANDARD', session_timeout: '1h' },
     notifications: { email_alerts: true, booking_confirmations: true, lead_notifications: true },
-    payments: { currency: 'USD', gateway: 'STRIPE', api_key: '' }
+    payments: { currency: 'USD', gateway: 'STRIPE', api_key: '', tax_rate: '0' }
   });
 
   useEffect(() => {
@@ -27,9 +30,12 @@ const AdminSettings: React.FC = () => {
       if (error) throw error;
 
       const mergedSettings = { ...settings };
+      // Default email to current user if nothing is in DB
+      mergedSettings.general.admin_email = user?.email || '';
+
       data?.forEach(item => {
         if (mergedSettings[item.key]) {
-          mergedSettings[item.key] = item.value;
+          mergedSettings[item.key] = { ...mergedSettings[item.key], ...item.value };
         }
       });
       setSettings(mergedSettings);

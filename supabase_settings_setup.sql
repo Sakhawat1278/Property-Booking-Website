@@ -12,21 +12,20 @@ ALTER TABLE "system_settings" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can manage settings" 
 ON "system_settings" 
 FOR ALL 
-USING (
-    EXISTS (
-        SELECT 1 FROM profiles 
-        WHERE id = auth.uid() 
-        AND role = 'ADMIN'
-    )
-);
+TO authenticated
+USING (public.is_admin());
 
--- Public can read certain public settings if needed (e.g., site name)
-CREATE POLICY "Everyone can read settings" ON "system_settings" FOR SELECT USING (true);
+-- Public can read certain public settings if needed (e.g., branding)
+CREATE POLICY "Everyone can read settings" 
+ON "system_settings" 
+FOR SELECT 
+TO anon, authenticated
+USING (true);
 
--- Insert initial default settings
+-- Insert initial empty settings
 INSERT INTO "system_settings" (key, value) VALUES 
-('general', '{"site_title": "Nestory Luxury", "admin_email": "admin@nestory.com", "support_phone": "+1 234 567 890"}'),
-('security', '{"mfa_enabled": false, "password_policy": "STRICT", "session_timeout": "30m"}'),
+('general', '{"admin_email": "", "support_phone": ""}'),
+('security', '{"mfa_enabled": false, "password_policy": "STANDARD", "session_timeout": "1h"}'),
 ('notifications', '{"email_alerts": true, "booking_confirmations": true, "lead_notifications": true}'),
-('payments', '{"currency": "USD", "gateway": "STRIPE", "tax_rate": "5"}')
+('payments', '{"currency": "USD", "gateway": "STRIPE", "tax_rate": "0"}')
 ON CONFLICT (key) DO NOTHING;
