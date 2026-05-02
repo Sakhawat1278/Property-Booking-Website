@@ -19,15 +19,24 @@ CREATE TABLE IF NOT EXISTS "profiles" (
 -- Enable RLS
 ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;
 
+-- Create a security definer function to check admin status
+-- This bypasses RLS to prevent recursion
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE id = auth.uid() 
+    AND role = 'ADMIN'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Policies
 CREATE POLICY "Public profiles are viewable by everyone" ON "profiles" FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own profile" ON "profiles" FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON "profiles" FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Admins can do everything" ON "profiles" FOR ALL USING (
-    EXISTS (
-        SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'ADMIN'
-    )
-);
+CREATE POLICY "Admins can do everything" ON "profiles" FOR ALL USING (public.is_admin());
 
 -- Trigger for updated_at
 CREATE OR REPLACE FUNCTION handle_updated_at()
