@@ -83,13 +83,33 @@ const AdminLayout: React.FC = () => {
         ))}
       </nav>
 
+      {/* Profile Panel */}
+      <div className="mx-3 mb-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-black font-bold text-[14px] shrink-0 overflow-hidden">
+            {user?.avatar_url ? (
+              <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span>{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
+            )}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[13px] font-bold text-black truncate">{user?.name || 'Admin'}</span>
+            <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter">Administrator</span>
+          </div>
+        </div>
+        <button className="w-full py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-bold text-black hover:bg-gray-100 transition-all">
+          View Settings
+        </button>
+      </div>
+
       {/* User Footer */}
       <div className="p-4 border-t border-gray-100">
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-black hover:bg-gray-50 rounded-xl transition-all group"
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-black hover:bg-gray-50 rounded-xl transition-all group"
         >
-          <LogOut size={18} className="text-black opacity-30 group-hover:opacity-100 transition-opacity" />
+          <LogOut size={16} className="text-black opacity-30 group-hover:opacity-100 transition-opacity" />
           Log Out
         </button>
       </div>
