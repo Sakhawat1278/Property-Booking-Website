@@ -169,12 +169,6 @@ const AdminLayout: React.FC = () => {
               <Bell size={16} />
               <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />
             </button>
-            <Link to="/admin/properties/new">
-              <button className="h-9 px-4 bg-indigo-600 text-white rounded-lg text-[13px] font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all ml-2">
-                <Plus size={16} />
-                Add Property
-              </button>
-            </Link>
           </div>
         </header>
 
