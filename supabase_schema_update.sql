@@ -58,7 +58,9 @@ ADD COLUMN IF NOT EXISTS "ownerType" text,
 ADD COLUMN IF NOT EXISTS "country" text,
 ADD COLUMN IF NOT EXISTS "exteriorGallery" text[],
 ADD COLUMN IF NOT EXISTS "livingGallery" text[],
-ADD COLUMN IF NOT EXISTS "kitchenGallery" text[];
+ADD COLUMN IF NOT EXISTS "kitchenGallery" text[],
+ADD COLUMN IF NOT EXISTS "owner_id" uuid REFERENCES auth.users(id),
+ADD COLUMN IF NOT EXISTS "created_by" uuid REFERENCES auth.users(id) DEFAULT auth.uid();
 
 -- Optional: Create index for faster searching
 CREATE INDEX IF NOT EXISTS idx_properties_status ON properties(status);

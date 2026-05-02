@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   User, Mail, Lock, Camera, Save, 
   Loader2, Shield, Bell, Smartphone, Trash2,
-  Briefcase, Fingerprint, RefreshCcw, Key, Image as ImageIcon
+  Briefcase, Fingerprint, RefreshCcw, Key, Image as ImageIcon,
+  Users, BarChart3, TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -13,6 +14,12 @@ const ProfileSettings: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [coverLoading, setCoverLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fetchingStats, setFetchingStats] = useState(true);
+  const [stats, setStats] = useState({
+    primary: { value: '0', label: 'Properties' },
+    secondary: { value: '0', label: 'Reviews' }
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   
@@ -40,8 +47,49 @@ const ProfileSettings: React.FC = () => {
         business_name: user.business_name || '',
         license_number: user.license_number || '',
       });
+      fetchStats();
     }
   }, [user]);
+
+  const fetchStats = async () => {
+    try {
+      setFetchingStats(true);
+      if (user?.role === 'ADMIN') {
+        // Admin stats: Total Users & Total Properties
+        const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+        const { count: propertiesCount } = await supabase.from('properties').select('*', { count: 'exact', head: true });
+        
+        setStats({
+          primary: { value: usersCount?.toString() || '0', label: 'Platform Users' },
+          secondary: { value: propertiesCount?.toString() || '0', label: 'Total Assets' }
+        });
+      } else {
+        // Agency stats: My Properties & Average Rating
+        const { count: myProperties } = await supabase
+          .from('properties')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user?.id);
+        
+        const { data: ratingData } = await supabase
+          .from('properties')
+          .select('rating')
+          .eq('owner_id', user?.id);
+
+        const avgRating = ratingData && ratingData.length > 0 
+          ? (ratingData.reduce((acc, curr) => acc + (curr.rating || 0), 0) / ratingData.length).toFixed(1)
+          : '0.0';
+
+        setStats({
+          primary: { value: myProperties?.toString() || '0', label: 'My Listings' },
+          secondary: { value: avgRating, label: 'Verified Rating' }
+        });
+      }
+    } catch (err) {
+      console.error('Stats error:', err);
+    } finally {
+      setFetchingStats(false);
+    }
+  };
 
   const handleUpdateProfile = async () => {
     try {
@@ -83,10 +131,7 @@ const ProfileSettings: React.FC = () => {
         .from(type === 'avatar' ? 'avatars' : 'covers')
         .upload(filePath, file);
 
-      if (uploadError) {
-        // If bucket doesn't exist, this might fail. We should ideally ensure buckets exist.
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from(type === 'avatar' ? 'avatars' : 'covers')
@@ -207,12 +252,20 @@ const ProfileSettings: React.FC = () => {
 
                 <div className="w-full grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-gray-100">
                    <div>
-                      <p className="text-[15px] font-bold text-black">12</p>
-                      <p className="text-[9px] font-bold text-black/30 uppercase tracking-tighter">Properties</p>
+                      <p className="text-[15px] font-bold text-black">
+                        {fetchingStats ? '...' : stats.primary.value}
+                      </p>
+                      <p className="text-[9px] font-bold text-black/30 uppercase tracking-tighter">
+                        {stats.primary.label}
+                      </p>
                    </div>
                    <div>
-                      <p className="text-[15px] font-bold text-black">4.9</p>
-                      <p className="text-[9px] font-bold text-black/30 uppercase tracking-tighter">Review Score</p>
+                      <p className="text-[15px] font-bold text-black">
+                        {fetchingStats ? '...' : stats.secondary.value}
+                      </p>
+                      <p className="text-[9px] font-bold text-black/30 uppercase tracking-tighter">
+                        {stats.secondary.label}
+                      </p>
                    </div>
                 </div>
              </div>
