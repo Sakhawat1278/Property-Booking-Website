@@ -29,7 +29,6 @@ const AdminProperties: React.FC = () => {
   useEffect(() => {
     fetchProperties();
 
-    // Realtime subscription for live updates
     const channel = supabase
       .channel('admin-properties-all')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
@@ -59,10 +58,9 @@ const AdminProperties: React.FC = () => {
     }
   };
 
-  // Filter
   const filtered = properties.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          p.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (p.title?.toLowerCase().includes(searchTerm.toLowerCase())) || 
+                          (p.city?.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -75,13 +73,8 @@ const AdminProperties: React.FC = () => {
       danger: true,
       onConfirm: async () => {
         try {
-          const { error } = await supabase
-            .from('properties')
-            .delete()
-            .eq('id', id);
-          
+          const { error } = await supabase.from('properties').delete().eq('id', id);
           if (error) throw error;
-          
           setProperties(prev => prev.filter(p => p.id !== id));
           toast.success('Property deleted successfully');
         } catch (err: any) {
@@ -93,13 +86,8 @@ const AdminProperties: React.FC = () => {
 
   const toggleVerification = async (id: string, current: boolean) => {
     try {
-      const { error } = await supabase
-        .from('properties')
-        .update({ isVerified: !current })
-        .eq('id', id);
-      
+      const { error } = await supabase.from('properties').update({ isVerified: !current }).eq('id', id);
       if (error) throw error;
-
       setProperties(prev => prev.map(p => p.id === id ? { ...p, isVerified: !current } : p));
       toast.success(current ? 'Property unverified' : 'Property verified');
     } catch (err: any) {
@@ -108,162 +96,124 @@ const AdminProperties: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header & Controls */}
+    <div className="space-y-6 font-poppins">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-bold text-[#1A1A1A]">Property Management</h1>
-          <p className="text-[13px] text-gray-400 mt-1">Manage your listings, edit details, and track performance.</p>
+          <h1 className="text-[20px] font-bold text-[#1A1A1A]">Property Management</h1>
+          <p className="text-[12px] text-gray-400 mt-0.5">Manage your listings, edit details, and track performance.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          {/* Search */}
+        <div className="flex flex-col sm:flex-row items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search properties..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-11 bg-white border border-gray-200 rounded-full pl-11 pr-4 text-[13px] focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/5 transition-all"
+              className="w-full h-10 bg-white border border-gray-100 rounded-lg pl-10 pr-4 text-[13px] focus:outline-none focus:border-indigo-500/20 transition-all"
             />
           </div>
 
-          {/* Filter */}
           <div className="relative w-full sm:w-auto">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-auto h-11 bg-white border border-gray-200 rounded-full pl-5 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-brand transition-colors cursor-pointer"
+              className="w-full sm:w-auto h-10 bg-white border border-gray-100 rounded-lg pl-4 pr-10 text-[13px] font-medium text-[#1A1A1A] appearance-none focus:outline-none focus:border-indigo-500/20 transition-colors cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="FOR_SALE">For Sale</option>
               <option value="FOR_RENT">For Rent</option>
               <option value="OFF_PLAN">Off Plan</option>
             </select>
-            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
 
           <button 
             onClick={() => navigate('/admin/properties/new')}
-            className="w-full sm:w-auto h-11 bg-brand hover:bg-brand-dark text-white px-6 rounded-full items-center justify-center gap-2 text-[13px] font-bold transition-all shadow-[0_4px_12px_rgba(255,77,0,0.2)] hover:shadow-[0_4px_16px_rgba(255,77,0,0.3)] hover:-translate-y-0.5 flex"
+            className="w-full sm:w-auto h-10 bg-indigo-600 text-white px-5 rounded-lg items-center justify-center gap-2 text-[13px] font-bold transition-all flex"
           >
             <Plus size={16} />
-            <span className="hidden sm:inline">Add Property</span>
+            <span>Add Property</span>
           </button>
         </div>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence>
-          {filtered.map((p, i) => (
-            <motion.div
+          {filtered.map((p) => (
+            <div
               key={p.id}
-              layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2, delay: i * 0.05 }}
-              className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:border-gray-200 transition-colors flex flex-col"
+              className="bg-white rounded-xl border border-gray-100 overflow-hidden group transition-colors flex flex-col"
             >
-              {/* Image Header */}
-              <div className="relative h-48 overflow-hidden bg-gray-100 shrink-0">
-                <img src={p.primaryImage} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Status Badge */}
-                <div className="absolute top-4 left-4">
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border backdrop-blur-md ${
-                    p.status === 'FOR_SALE' ? 'bg-blue-500/20 text-blue-100 border-blue-400/30' :
-                    p.status === 'FOR_RENT' ? 'bg-green-500/20 text-green-100 border-green-400/30' :
-                    'bg-purple-500/20 text-purple-100 border-purple-400/30'
+              <div className="relative h-44 overflow-hidden bg-gray-50 shrink-0">
+                <img src={p.primaryImage} alt={p.title} className="w-full h-full object-cover" />
+                <div className="absolute top-3 left-3">
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border ${
+                    p.status === 'FOR_SALE' ? 'bg-indigo-600 text-white border-transparent' : 'bg-white text-[#1A1A1A] border-gray-200'
                   }`}>
                     {statusLabels[p.status]}
                   </span>
                 </div>
-
-                {/* Price */}
-                <div className="absolute bottom-4 left-4">
-                  <p className="text-white font-bold text-[20px] leading-none">
-                    ${p.price.toLocaleString()}
-                    {p.status === 'FOR_RENT' && <span className="text-[12px] font-medium text-white/70">/mo</span>}
-                  </p>
-                </div>
               </div>
 
-              {/* Content */}
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="text-[15px] font-bold text-[#1A1A1A] leading-tight line-clamp-1">{p.title}</h3>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
-                    <Star size={12} className="fill-current" />
+              <div className="p-4 flex-1 flex flex-col">
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <h3 className="text-[14px] font-bold text-[#1A1A1A] leading-tight line-clamp-1">{p.title}</h3>
+                  <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded shrink-0">
+                    <Star size={10} className="fill-current" />
                     {p.rating}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-gray-500 mb-4">
-                  <MapPin size={14} />
-                  <span className="text-[12px] font-medium truncate">{p.neighborhood}, {p.city}</span>
+                <div className="flex items-center gap-1 text-gray-400 mb-4">
+                  <MapPin size={12} />
+                  <span className="text-[11px] font-medium truncate">{p.neighborhood}, {p.city}</span>
                 </div>
 
-                <div className="flex items-center gap-4 py-3 border-y border-gray-50 mb-auto">
-                  <div className="flex items-center gap-1.5 text-gray-600">
-                    <Bed size={16} className="text-gray-400" />
-                    <span className="text-[13px] font-semibold">{p.bedrooms}</span>
+                <div className="grid grid-cols-3 gap-2 py-3 border-y border-gray-50 mb-auto">
+                  <div className="text-center border-r border-gray-50">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Beds</p>
+                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.bedrooms}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-600">
-                    <Bath size={16} className="text-gray-400" />
-                    <span className="text-[13px] font-semibold">{p.bathrooms}</span>
+                  <div className="text-center border-r border-gray-50">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Baths</p>
+                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.bathrooms}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-600">
-                    <span className="text-[13px] font-semibold">{p.totalArea} <span className="text-[11px] text-gray-400 font-normal">sqft</span></span>
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Area</p>
+                    <p className="text-[13px] font-bold text-[#1A1A1A]">{p.totalArea}</p>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center justify-between mt-4 pt-1">
-                  <button 
-                    onClick={() => toggleVerification(p.id, p.isVerified)}
-                    className="flex items-center gap-2 text-[12px] font-semibold text-gray-500 hover:text-[#1A1A1A] transition-colors"
-                  >
-                    {p.isVerified ? (
-                      <><ToggleRight size={20} className="text-brand" /> Verified</>
-                    ) : (
-                      <><ToggleLeft size={20} className="text-gray-300" /> Unverified</>
-                    )}
-                  </button>
-
+                <div className="flex items-center justify-between mt-4">
+                   <p className="text-[#1A1A1A] font-bold text-[16px]">
+                    ${p.price.toLocaleString()}
+                  </p>
                   <div className="flex items-center gap-1">
                     <button 
                       onClick={() => navigate(`/admin/properties/edit/${p.id}`)}
-                      className="p-2 text-gray-400 hover:text-brand hover:bg-brand/5 rounded-lg transition-colors"
-                      title="Edit Property"
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                     >
-                      <Edit3 size={16} />
+                      <Edit3 size={14} />
                     </button>
                     <button 
                       onClick={() => handleDelete(p.id, p.title)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete Property"
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </AnimatePresence>
       </div>
 
       {filtered.length === 0 && (
-        <div className="py-20 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-            <Search size={24} className="text-gray-300" />
-          </div>
-          <h3 className="text-[16px] font-bold text-[#1A1A1A] mb-1">No properties found</h3>
-          <p className="text-[13px] text-gray-400">Try adjusting your search or filters.</p>
+        <div className="py-20 text-center">
+          <p className="text-[14px] text-gray-400 font-medium">No properties found matching your search.</p>
         </div>
       )}
     </div>
