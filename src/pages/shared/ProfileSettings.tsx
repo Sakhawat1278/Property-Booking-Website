@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   User, Mail, Lock, Camera, Save, 
   Loader2, Shield, Bell, Smartphone, Trash2,
-  Briefcase, Fingerprint, RefreshCcw, Key
+  Briefcase, Fingerprint, RefreshCcw, Key, Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -11,8 +11,10 @@ import { toast } from 'sonner';
 const ProfileSettings: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -66,38 +68,46 @@ const ProfileSettings: React.FC = () => {
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      setLoading(true);
+      if (type === 'avatar') setLoading(true);
+      else setCoverLoading(true);
+
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
+      const filePath = `${user?.id}/${type}-${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from(type === 'avatar' ? 'avatars' : 'covers')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        // If bucket doesn't exist, this might fail. We should ideally ensure buckets exist.
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from(type === 'avatar' ? 'avatars' : 'covers')
         .getPublicUrl(filePath);
+
+      const updateData = type === 'avatar' ? { avatar_url: publicUrl } : { cover_url: publicUrl };
 
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update(updateData)
         .eq('id', user?.id);
 
       if (updateError) throw updateError;
       
       await refreshUser();
-      toast.success('Profile image synchronized');
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} synchronized`);
     } catch (err: any) {
       toast.error('Upload failed: ' + err.message);
     } finally {
-      setLoading(false);
+      if (type === 'avatar') setLoading(false);
+      else setCoverLoading(false);
     }
   };
 
@@ -144,10 +154,29 @@ const ProfileSettings: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
         {/* Left Card: Identity Quick View */}
         <div className="xl:col-span-1 space-y-8">
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-             <div className="h-24 bg-gray-50 border-b border-gray-100 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-50" />
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden relative group/card">
+             <div className="h-32 bg-gray-50 border-b border-gray-100 flex items-center justify-center relative overflow-hidden">
+                {user?.cover_url ? (
+                  <img src={user.cover_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-50" />
+                )}
+                
+                {coverLoading && (
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-20 backdrop-blur-sm">
+                    <Loader2 className="animate-spin text-white" size={24} />
+                  </div>
+                )}
+
+                <button 
+                  onClick={() => coverInputRef.current?.click()}
+                  className="absolute top-4 right-4 w-9 h-9 bg-white/80 backdrop-blur-md border border-white/50 text-black rounded-lg flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all shadow-xl hover:bg-white"
+                >
+                  <Camera size={16} />
+                </button>
+                <input ref={coverInputRef} type="file" onChange={(e) => handleImageUpload(e, 'cover')} className="hidden" accept="image/*" />
              </div>
+
              <div className="px-6 pb-8 -mt-12 flex flex-col items-center text-center relative z-10">
                 <div className="relative group">
                   <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-100 shadow-xl overflow-hidden flex items-center justify-center relative">
@@ -168,7 +197,7 @@ const ProfileSettings: React.FC = () => {
                   >
                     <Camera size={12} />
                   </button>
-                  <input ref={fileInputRef} type="file" onChange={handleAvatarUpload} className="hidden" accept="image/*" />
+                  <input ref={fileInputRef} type="file" onChange={(e) => handleImageUpload(e, 'avatar')} className="hidden" accept="image/*" />
                 </div>
                 
                 <div className="mt-4">

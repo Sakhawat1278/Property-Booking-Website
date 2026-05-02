@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS "profiles" (
     "website" text,
     "experience" text,
     "avatar_url" text,
+    "cover_url" text,
+    "bio" text,
     "status" text DEFAULT 'ACTIVE',
     "created_at" timestamptz DEFAULT now(),
     "updated_at" timestamptz DEFAULT now()
