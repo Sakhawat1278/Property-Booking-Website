@@ -67,7 +67,7 @@ const AdminLayout: React.FC = () => {
               `flex items-center gap-3 px-4 py-2.5 text-[13px] transition-all group relative ${
                 isActive 
                   ? 'bg-gray-50 text-black font-bold rounded-lg' 
-                  : 'text-black/60 hover:text-black hover:bg-gray-50/50 rounded-lg font-medium'
+                  : 'text-black hover:bg-gray-50/50 rounded-lg font-medium'
               }`
             }
           >
@@ -153,7 +153,7 @@ const AdminLayout: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Search properties, agents, tenants..."
-                  className="w-full h-9 bg-gray-50/50 border border-gray-200 focus:bg-white focus:border-indigo-500/20 rounded-lg pl-10 pr-10 text-[13px] focus:outline-none transition-all placeholder:text-gray-300"
+                  className="w-full h-9 bg-gray-50/50 border border-gray-200 focus:bg-white focus:border-indigo-500/20 rounded-lg pl-10 pr-10 text-[13px] focus:outline-none transition-all placeholder:text-black/70"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-20">
                   <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[9px] font-bold">⌘</kbd>

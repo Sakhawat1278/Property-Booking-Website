@@ -122,7 +122,7 @@ const AdminOverview: React.FC = () => {
             </div>
             <div>
               <h3 className="text-[26px] font-bold text-black leading-none mb-2">{kpi.value}</h3>
-              <p className="text-[11px] font-medium text-black/60">{kpi.change}</p>
+              <p className="text-[11px] font-medium text-black">{kpi.change}</p>
             </div>
           </div>
         ))}
@@ -160,7 +160,7 @@ const AdminOverview: React.FC = () => {
                     <span className="text-[13px] font-medium text-black">{p.title}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[13px] text-black/60 font-medium">{p.city}</span>
+                    <span className="text-[13px] text-black font-medium">{p.city}</span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-[13px] font-bold text-black">${p.price?.toLocaleString()}</span>
@@ -214,20 +214,20 @@ const AdminOverview: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[13px] font-bold text-[#1A1A1A]">
+                    <span className="text-[13px] font-bold text-black">
                       {i === 0 ? 'Recent Inquiries' : i === 1 ? 'Michael Chen' : 'Jessica Williams'}
                     </span>
-                    <span className="text-[10px] text-gray-400 font-medium">10:59AM</span>
+                    <span className="text-[10px] text-black font-medium">10:59AM</span>
                   </div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[11px] text-gray-400">For: {i === 0 ? 'Sunset Villa' : i === 1 ? 'City Loft' : 'Mountain Retreat'}</span>
+                    <span className="text-[11px] text-black">For: {i === 0 ? 'Sunset Villa' : i === 1 ? 'City Loft' : 'Mountain Retreat'}</span>
                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
                       i === 1 ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'
                     }`}>
                       {i === 1 ? 'Followed Up' : 'New'}
                     </span>
                   </div>
-                  <p className="text-[12px] text-gray-500 truncate leading-snug">
+                  <p className="text-[12px] text-black truncate leading-snug">
                     {i === 1 ? 'Is the price negotiable? I am very interested.' : 'I would like to schedule a viewing this weekend.'}
                   </p>
                 </div>
