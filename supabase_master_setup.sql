@@ -3,6 +3,7 @@
 -- Run this in the Supabase SQL Editor.
 
 -- 1. DROP EXISTING TABLES (CAUTION: Removes all data)
+-- To perform a complete fresh install, uncomment the lines below:
 -- DROP TABLE IF EXISTS "system_settings" CASCADE;
 -- DROP TABLE IF EXISTS "bookings" CASCADE;
 -- DROP TABLE IF EXISTS "properties" CASCADE;
@@ -53,12 +54,19 @@ CREATE TABLE IF NOT EXISTS "profiles" (
 
 ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policies
+-- Profiles Policies (Drop and Recreate for Idempotency)
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON "profiles";
+DROP POLICY IF EXISTS "Users can insert their own profile" ON "profiles";
+DROP POLICY IF EXISTS "Users can update their own profile" ON "profiles";
+DROP POLICY IF EXISTS "Admins can manage all profiles" ON "profiles";
+
 CREATE POLICY "Public profiles are viewable by everyone" ON "profiles" FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own profile" ON "profiles" FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON "profiles" FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Admins can manage all profiles" ON "profiles" FOR ALL USING (public.is_admin());
 
+-- Trigger for updated_at (Drop and Recreate)
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON profiles
     FOR EACH ROW
@@ -84,7 +92,7 @@ CREATE TABLE IF NOT EXISTS "properties" (
     "bathrooms" integer DEFAULT 0,
     "totalArea" numeric DEFAULT 0,
     "pricePerSqft" numeric DEFAULT 0,
-    "internalAmenities" text, -- Stored as comma separated or JSON
+    "internalAmenities" text, 
     "externalAmenities" text,
     "estimatedROI" numeric DEFAULT 0,
     "rentalYield" numeric DEFAULT 0,
@@ -134,7 +142,12 @@ CREATE TABLE IF NOT EXISTS "properties" (
 
 ALTER TABLE "properties" ENABLE ROW LEVEL SECURITY;
 
--- Properties Policies
+-- Properties Policies (Drop and Recreate)
+DROP POLICY IF EXISTS "Allow public select properties" ON "properties";
+DROP POLICY IF EXISTS "Allow authenticated to insert properties" ON "properties";
+DROP POLICY IF EXISTS "Allow owners and admins to update properties" ON "properties";
+DROP POLICY IF EXISTS "Allow owners and admins to delete properties" ON "properties";
+
 CREATE POLICY "Allow public select properties" ON "properties" FOR SELECT USING (true);
 CREATE POLICY "Allow authenticated to insert properties" ON "properties" FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Allow owners and admins to update properties" ON "properties" FOR UPDATE USING (auth.uid() = owner_id OR public.is_admin());
@@ -144,6 +157,7 @@ CREATE INDEX IF NOT EXISTS idx_properties_status ON properties(status);
 CREATE INDEX IF NOT EXISTS idx_properties_category ON properties(category);
 CREATE INDEX IF NOT EXISTS idx_properties_owner ON properties(owner_id);
 
+DROP TRIGGER IF EXISTS update_properties_updated_at ON properties;
 CREATE TRIGGER update_properties_updated_at
     BEFORE UPDATE ON properties
     FOR EACH ROW
@@ -166,7 +180,11 @@ CREATE TABLE IF NOT EXISTS "bookings" (
 
 ALTER TABLE "bookings" ENABLE ROW LEVEL SECURITY;
 
--- Bookings Policies
+-- Bookings Policies (Drop and Recreate)
+DROP POLICY IF EXISTS "Allow public to create leads" ON "bookings";
+DROP POLICY IF EXISTS "Owners can see leads for their properties" ON "bookings";
+DROP POLICY IF EXISTS "Admins can manage all leads" ON "bookings";
+
 CREATE POLICY "Allow public to create leads" ON "bookings" FOR INSERT WITH CHECK (true);
 CREATE POLICY "Owners can see leads for their properties" ON "bookings" FOR SELECT USING (
   EXISTS (
@@ -186,6 +204,9 @@ CREATE TABLE IF NOT EXISTS "system_settings" (
 
 ALTER TABLE "system_settings" ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Everyone can read settings" ON "system_settings";
+DROP POLICY IF EXISTS "Admins can manage settings" ON "system_settings";
+
 CREATE POLICY "Everyone can read settings" ON "system_settings" FOR SELECT USING (true);
 CREATE POLICY "Admins can manage settings" ON "system_settings" FOR ALL USING (public.is_admin());
 
@@ -198,7 +219,6 @@ INSERT INTO "system_settings" (key, value) VALUES
 ON CONFLICT (key) DO NOTHING;
 
 -- 8. AUTH AUTOMATION
--- Automate profile creation on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -208,7 +228,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Check if trigger exists before creating
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'on_auth_user_created') THEN
