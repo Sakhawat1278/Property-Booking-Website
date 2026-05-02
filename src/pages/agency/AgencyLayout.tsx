@@ -92,7 +92,7 @@ const AgencyLayout: React.FC = () => {
           </div>
         </div>
         <button className="w-full py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-bold text-black hover:bg-gray-100 transition-all">
-          View Profile
+          Profile Settings
         </button>
       </div>
 
