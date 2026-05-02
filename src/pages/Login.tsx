@@ -46,6 +46,21 @@ const Login = () => {
     try {
       console.log('Attempting login for:', email);
       
+      // Connection check
+      try {
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
+          method: 'GET',
+          headers: { 'apikey': supabase.supabaseKey }
+        });
+        if (!response.ok && response.status !== 404) {
+          throw new Error('Supabase project unreachable');
+        }
+      } catch (e) {
+        setLoading(false);
+        toast.error('Network error: Cannot reach Supabase. Check your project URL or internet connection.');
+        return;
+      }
+
       // Safety timeout for the UI
       const loginTimeout = setTimeout(() => {
         if (loading) {
