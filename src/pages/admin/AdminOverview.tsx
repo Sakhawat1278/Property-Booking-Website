@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Building2, Users, Loader2, UserCheck, CreditCard, ChevronRight,
-  Target, Calendar, TrendingUp
+  Target, Calendar, TrendingUp, ArrowRight
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Link } from 'react-router-dom';
