@@ -91,9 +91,6 @@ const AdminLayout: React.FC = () => {
                {user?.name?.charAt(0).toUpperCase() || 'A'}
              </div>
           </div>
-            <div className="hidden lg:flex items-center gap-2">
-              <span className="text-[15px] font-bold text-black">{currentPathName}</span>
-            </div>
           <div className="flex flex-col min-w-0">
             <span className="text-[13px] font-bold text-black truncate">{user?.name || 'Admin'}</span>
             <button onClick={handleLogout} className="text-[11px] text-black hover:text-red-500 text-left transition-colors font-medium">Log Out</button>
