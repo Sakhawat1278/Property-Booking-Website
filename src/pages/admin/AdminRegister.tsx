@@ -17,80 +17,49 @@ const AdminRegister: React.FC = () => {
     if (!email || !password || !name) return;
     
     console.log('--- ADMIN REGISTRATION START ---');
-    console.log('Email:', email);
     setLoading(true);
 
-    // Global Safety Timeout - Reset UI after 10 seconds no matter what
-    const globalTimeout = setTimeout(() => {
-      setLoading(false);
-      console.warn('!!! Global Registration Timeout Triggered !!!');
-    }, 10000);
-
     try {
-      // 1. Sign up user via Supabase Auth
-      console.log('Calling supabase.auth.signUp...');
-      const { data, error } = await supabase.auth.signUp({
+      console.log('Initiating signUp with shouldCreateSession: false...');
+      
+      // Use a race to prevent infinite hanging
+      const signUpPromise = supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-            role: 'ADMIN'
-          }
+          data: { name, role: 'ADMIN' },
+          shouldCreateSession: false // This avoids the "Lock" issue entirely
         }
       });
 
-      console.log('signUp Response Received:', { hasData: !!data, hasUser: !!data?.user, hasError: !!error });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('SUPABASE_HANG')), 8000)
+      );
+
+      const { data, error } = await Promise.race([signUpPromise, timeoutPromise]) as any;
+
+      console.log('signUp Response Received');
 
       if (error) {
         console.error('Registration Error:', error);
         toast.error(error.message);
-        clearTimeout(globalTimeout);
-        setLoading(false);
         return;
       }
 
-      if (data.user) {
-        console.log('User created successfully. User ID:', data.user.id);
-        
-        // Check if we need to verify email
-        if (!data.session) {
-          console.log('Email verification required. Session is null.');
-          toast.success('Admin account initialized! Please check your email to verify your account.');
-          clearTimeout(globalTimeout);
-          setLoading(false);
-          return;
-        }
-
-        console.log('Session created. Updating profile role...');
-        // 2. If already authenticated (auto-confirm is on), update profile role
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ 
-            role: 'ADMIN', 
-            verification_status: 'APPROVED',
-            name: name
-          })
-          .eq('id', data.user.id);
-        
-        if (profileError) {
-          console.warn('Profile role update warning:', profileError);
-        } else {
-          console.log('Profile updated to ADMIN successfully.');
-        }
-
-        toast.success('Admin account created successfully!');
-        clearTimeout(globalTimeout);
+      if (data?.user) {
+        console.log('User created. ID:', data.user.id);
+        toast.success('Admin account created! Please check your email to verify (if required) then sign in.');
         navigate('/login');
-      } else {
-        console.warn('SignUp finished but no user returned.');
-        toast.error('Registration failed. No user object returned.');
       }
     } catch (err: any) {
-      console.error('CRITICAL REGISTRATION FATAL ERROR:', err);
-      toast.error('Fatal error: ' + (err.message || 'Check console'));
+      if (err.message === 'SUPABASE_HANG') {
+        console.error('CRITICAL: Supabase signUp hung for 8s.');
+        toast.error('The registration request is taking too long. Please check if the user was created in your Supabase dashboard.');
+      } else {
+        console.error('Registration Fatal Error:', err);
+        toast.error('Error: ' + err.message);
+      }
     } finally {
-      clearTimeout(globalTimeout);
       setLoading(false);
       console.log('--- ADMIN REGISTRATION END ---');
     }
