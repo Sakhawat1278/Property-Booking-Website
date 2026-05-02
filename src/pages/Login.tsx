@@ -37,12 +37,12 @@ const Login = () => {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // Instant Redirection Effect
   useEffect(() => {
     if (user && !authLoading) {
-      if (user.role === 'ADMIN') navigate('/admin');
-      else if (user.role === 'AGENCY') navigate('/agency');
-      else navigate('/');
+      console.log('User detected, redirecting...', user.role);
+      const target = user.role === 'ADMIN' ? '/admin' : user.role === 'AGENCY' ? '/agency' : '/';
+      navigate(target, { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -53,10 +53,9 @@ const Login = () => {
       return;
     }
     
+    setLoading(true);
     try {
-      setLoading(true);
-      console.log('Attempting login for:', email);
-      
+      console.log('Calling signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -64,15 +63,17 @@ const Login = () => {
 
       if (error) {
         console.error('Login error:', error);
-        throw error;
+        toast.error(error.message || 'Invalid email or password');
+        setLoading(false);
+        return;
       }
       
-      console.log('Login success:', data.user?.id);
+      console.log('Sign in call returned successfully');
       toast.success('Welcome back!');
-      
-      // The useEffect will handle redirection once the auth state updates
+      // Redirection is handled by the useEffect for a cleaner state flow
     } catch (err: any) {
-      toast.error(err.message || 'Invalid email or password');
+      console.error('Unexpected Login Error:', err);
+      toast.error('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
   };
@@ -84,8 +85,8 @@ const Login = () => {
       return;
     }
     
+    setLoading(true);
     try {
-      setLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -103,11 +104,14 @@ const Login = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
+      }
       
       if (data.session) {
         toast.success('Account created successfully!');
-        // Redirection handled by useEffect
       } else {
         toast.info('Please check your email for the verification link');
         setMode('login');
@@ -119,10 +123,14 @@ const Login = () => {
     }
   };
 
-  if (authLoading) {
+  // If loading the initial session, show a clean loader
+  if (authLoading && !user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+           <div className="w-10 h-10 border-4 border-black/10 border-t-black rounded-full animate-spin" />
+           <p className="text-[12px] font-bold text-black uppercase tracking-widest opacity-40">Securing Session...</p>
+        </div>
       </div>
     );
   }
@@ -158,7 +166,7 @@ const Login = () => {
                    mode === 'forgot' ? 380 :
                    role === 'USER' ? 400 : 550 
           }}
-          className="bg-white rounded-[32px] p-8 border border-gray-100 overflow-hidden"
+          className="bg-white rounded-[32px] p-8 border border-gray-100 overflow-hidden shadow-2xl"
         >
           {/* Logo Section */}
           <div className="flex flex-col items-center mb-8">

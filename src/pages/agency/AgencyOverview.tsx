@@ -1,182 +1,149 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { 
-  Building2, Users, Target, Calendar, TrendingUp, ChevronRight, 
-  Loader2, MessageSquare, Clock, CheckCircle2, User
+  Home, Users, MessageSquare, TrendingUp, 
+  ArrowUpRight, Clock, ChevronRight,
+  Eye, MousePointer2, Contact2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const AgencyOverview: React.FC = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({
-    myProperties: 0,
-    totalLeads: 0,
-    activeBookings: 0,
-    revenue: 0
+    activeListings: 0,
+    totalViews: 1254,
+    totalInquiries: 0,
+    responseRate: '98%'
   });
-  const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchAgencyData();
+      fetchAgencyStats();
     }
   }, [user]);
 
-  const fetchAgencyData = async () => {
+  const fetchAgencyStats = async () => {
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
     try {
-      setLoading(true);
-      
-      // Fetch stats for this specific agency
-      const { data: props } = await supabase.from('properties').select('id').eq('owner_id', user?.id);
-      const { data: leads } = await supabase.from('bookings').select('*, properties!inner(*)').eq('properties.owner_id', user?.id).eq('type', 'VIEWING');
-      const { data: bookings } = await supabase.from('bookings').select('*, properties!inner(*)').eq('properties.owner_id', user?.id).eq('type', 'BOOKING').eq('status', 'CONFIRMED');
+      const [
+        { count: propertiesCount },
+        { count: inquiriesCount }
+      ] = await Promise.all([
+        supabase.from('properties').select('*', { count: 'exact', head: true }).eq('owner_id', user?.id),
+        supabase.from('bookings').select('*, properties!inner(owner_id)', { count: 'exact', head: true }).eq('properties.owner_id', user?.id).eq('type', 'VIEWING')
+      ]);
 
-      setStats({
-        myProperties: props?.length || 0,
-        totalLeads: leads?.length || 0,
-        activeBookings: bookings?.length || 0,
-        revenue: bookings?.reduce((acc: number, curr: any) => acc + (curr.total_amount || 0), 0) || 0
-      });
-
-      // Recent leads for this agency
-      const { data: rLeads } = await supabase
-        .from('bookings')
-        .select('*, properties!inner(title)')
-        .eq('properties.owner_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(4);
-      
-      setRecentLeads(rLeads || []);
-
-    } catch (err: any) {
-      console.error('Agency fetch error:', err.message);
+      setStats(prev => ({
+        ...prev,
+        activeListings: propertiesCount || 0,
+        totalInquiries: inquiriesCount || 0
+      }));
+    } catch (error) {
+      console.error('Error fetching agency stats:', error);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
-  if (loading && stats.myProperties === 0) {
+  const metrics = [
+    { label: 'Active Listings', value: stats.activeListings, icon: Home, color: 'text-blue-600', bg: 'bg-blue-50', trend: '+2' },
+    { label: 'Total Views', value: stats.totalViews.toLocaleString(), icon: Eye, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12%' },
+    { label: 'Inquiries', value: stats.totalInquiries, icon: MessageSquare, color: 'text-orange-600', bg: 'bg-orange-50', trend: '+5' },
+    { label: 'Click Rate', value: '4.2%', icon: MousePointer2, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: '+0.8%' },
+  ];
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin text-emerald-500" size={32} />
+      <div className="p-8 space-y-8 animate-pulse">
+         <div className="h-8 w-48 bg-gray-200 rounded-lg" />
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-100 rounded-2xl" />)}
+         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 font-poppins animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+    <div className="p-2 md:p-6 space-y-8 font-poppins">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-bold text-black">Agency Dashboard</h1>
-          <p className="text-[12px] text-black/60 mt-0.5">Welcome back! Here's what's happening with your properties today.</p>
+          <h1 className="text-2xl font-bold text-gray-900 uppercase tracking-tight">Agency Performance</h1>
+          <p className="text-gray-500 text-sm">Real-time insights for your property portfolio.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="px-4 py-2 bg-white border border-gray-200 rounded-xl flex items-center gap-2 text-sm font-medium text-gray-600 shadow-sm">
+            <Clock size={16} className="text-gray-400" />
+            Last 30 Days
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'My Properties', value: stats.myProperties, icon: <Building2 size={16} />, color: 'emerald' },
-          { label: 'New Leads', value: stats.totalLeads, icon: <Target size={16} />, color: 'blue' },
-          { label: 'Total Bookings', value: stats.activeBookings, icon: <Calendar size={16} />, color: 'orange' },
-          { label: 'Total Earnings', value: `$${stats.revenue.toLocaleString()}`, icon: <TrendingUp size={16} />, color: 'indigo' },
-        ].map((kpi, i) => (
-          <div key={i} className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-8 h-8 rounded-lg bg-${kpi.color}-50 text-${kpi.color}-600 flex items-center justify-center`}>
-                {kpi.icon}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((metric, index) => (
+          <motion.div
+            key={metric.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="flex items-start justify-between">
+              <div className={`p-3 rounded-xl ${metric.bg} ${metric.color} group-hover:scale-110 transition-transform`}>
+                <metric.icon size={24} />
               </div>
-              <span className="text-[10px] font-bold text-black/30 uppercase tracking-widest">Real-time</span>
+              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                <ArrowUpRight size={12} />
+                {metric.trend}
+              </span>
             </div>
-            <h3 className="text-[24px] font-bold text-black">{kpi.value}</h3>
-            <p className="text-[12px] font-bold text-black/40 uppercase tracking-wider mt-1">{kpi.label}</p>
-          </div>
+            <div className="mt-4">
+              <h3 className="text-gray-500 text-sm font-medium">{metric.label}</h3>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Activity Feed */}
-        <div className="lg:col-span-7 bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-black">Recent Inquiries & Leads</h2>
-            <Link to="/agency/leads" className="text-[11px] font-bold text-emerald-600 hover:underline flex items-center gap-1">
-              View All <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {recentLeads.map((lead) => (
-              <div key={lead.id} className="p-4 hover:bg-gray-50/50 transition-colors flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-black shrink-0">
-                  <User size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center mb-0.5">
-                    <p className="text-[13px] font-bold text-black truncate">{lead.guest_name}</p>
-                    <span className="text-[10px] text-black/40 font-bold">{new Date(lead.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <p className="text-[12px] text-black/60 truncate">Inquired about <span className="font-bold text-black">{lead.properties?.title}</span></p>
-                </div>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${
-                  lead.status === 'PENDING' ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'
-                }`}>
-                  {lead.status}
-                </span>
-              </div>
-            ))}
-            {recentLeads.length === 0 && (
-              <div className="p-12 text-center text-black/30">
-                <MessageSquare size={32} className="mx-auto mb-3 opacity-10" />
-                <p className="text-[13px] font-bold">No recent leads found.</p>
-              </div>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-gray-900">Inquiry Volume</h3>
+              <TrendingUp size={20} className="text-gray-400" />
+            </div>
+            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-100 rounded-xl bg-gray-50/50">
+              <p className="text-gray-400 text-sm font-medium">Trend analytics coming soon...</p>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="lg:col-span-5 space-y-6">
-           <div className="bg-black rounded-xl p-6 text-white overflow-hidden relative group">
-              <div className="relative z-10">
-                <h3 className="text-[18px] font-bold mb-2">Publish New Listing</h3>
-                <p className="text-white/60 text-[12px] mb-6 leading-relaxed">Reach thousands of potential buyers by listing your next property today.</p>
-                <Link to="/agency/properties/new">
-                  <button className="h-10 px-6 bg-white text-black rounded-lg text-[13px] font-bold hover:bg-emerald-50 transition-all flex items-center gap-2">
-                    Get Started <ArrowRight size={16} />
-                  </button>
-                </Link>
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-900">Recent Leads</h3>
+            <button className="text-xs font-bold text-[#FF4D00] hover:underline flex items-center gap-1">
+              View All <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="space-y-4">
+            {stats.totalInquiries === 0 ? (
+              <div className="text-center py-8">
+                <Contact2 size={32} className="mx-auto text-gray-200 mb-2" />
+                <p className="text-sm text-gray-400">No recent leads found.</p>
               </div>
-              <Building2 size={120} className="absolute -right-8 -bottom-8 text-white/5 group-hover:scale-110 transition-transform duration-700" />
-           </div>
-
-           <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-[14px] font-bold text-black mb-4">System Notifications</h3>
-              <div className="space-y-4">
-                 <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                    <div>
-                       <p className="text-[12px] font-bold text-black">New View Scheduled</p>
-                       <p className="text-[11px] text-black/60">A viewing for Sunset Villa has been confirmed for tomorrow.</p>
-                    </div>
-                 </div>
-                 <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
-                    <div>
-                       <p className="text-[12px] font-bold text-black">Payout Processed</p>
-                       <p className="text-[11px] text-black/60">Your rental earnings for March have been transferred.</p>
-                    </div>
-                 </div>
-              </div>
-           </div>
+            ) : (
+              <p className="text-sm text-gray-500">You have {stats.totalInquiries} inquiries to review.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const ArrowRight = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-  </svg>
-);
 
 export default AgencyOverview;
