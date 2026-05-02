@@ -45,7 +45,7 @@ const AgencyLayout: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
             <div className="w-4 h-4 rounded-full bg-emerald-500" />
           </div>
-          <span className="text-black font-bold text-[18px] tracking-tight italic">Partner Hub</span>
+          <span className="text-black font-bold text-[18px] tracking-tight italic">Nestory Partners</span>
         </div>
       </div>
 

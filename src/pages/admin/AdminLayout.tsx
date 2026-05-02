@@ -51,7 +51,7 @@ const AdminLayout: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
             <div className="w-4 h-4 rounded-full bg-indigo-500" />
           </div>
-          <span className="text-black font-bold text-[18px] tracking-tight">Listora</span>
+          <span className="text-black font-bold text-[18px] tracking-tight">Nestory</span>
         </div>
       </div>
 

@@ -105,19 +105,12 @@ const AdminSettings: React.FC = () => {
           onSave={() => handleSave('general')}
         >
           <div className="space-y-4">
-             <Field label="Site Title">
-                <input 
-                  value={settings.general.site_title} 
-                  onChange={e => setSettings({...settings, general: {...settings.general, site_title: e.target.value}})}
-                  className="slick-input" placeholder="e.g. Nestory Luxury" 
-                />
-             </Field>
              <div className="grid grid-cols-2 gap-4">
                 <Field label="Admin Email">
                   <input 
                     type="email" value={settings.general.admin_email} 
                     onChange={e => setSettings({...settings, general: {...settings.general, admin_email: e.target.value}})}
-                    className="slick-input" placeholder="admin@domain.com" 
+                    className="slick-input" placeholder="admin@nestory.com" 
                   />
                 </Field>
                 <Field label="Support Phone">
