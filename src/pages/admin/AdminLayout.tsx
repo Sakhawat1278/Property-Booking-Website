@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, Building2, CalendarCheck, Users, 
-  LogOut, Menu, X, Shield, Search, Bell, MessageSquare, Plus, Home,
-  Target, UserCheck, CreditCard, BarChart3, Settings, User as UserIcon
+  Menu, Shield, Search, Bell, MessageSquare, Home,
+  Target, UserCheck, CreditCard, BarChart3, Settings
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useModalStore } from '../../store/useModalStore';
 
@@ -22,23 +21,14 @@ const navItems = [
 ];
 
 const AdminLayout: React.FC = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { openModal } = useModalStore();
-
-  const handleLogout = () => {
-    openModal({
-      title: 'Sign Out',
-      description: 'Are you sure you want to securely log out of the admin console?',
-      confirmText: 'Sign Out',
-      danger: true,
-      onConfirm: () => {
-        logout();
-        navigate('/login');
-      }
-    });
+  
+  // Mock User Data for design continuity
+  const user = {
+    name: 'Nestory Admin',
+    avatar_url: null
   };
 
   const currentPathName = navItems.find(item => item.to === location.pathname)?.label || 'Dashboard';
@@ -84,18 +74,14 @@ const AdminLayout: React.FC = () => {
       </nav>
 
       {/* Profile Panel */}
-      <div className="mx-3 mb-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+      <div className="mx-3 mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-black font-bold text-[14px] shrink-0 overflow-hidden">
-            {user?.avatar_url ? (
-              <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span>{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
-            )}
+            <span>{user.name.charAt(0)}</span>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-bold text-black truncate">{user?.name || 'Admin'}</span>
-            <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter">Administrator</span>
+            <span className="text-[13px] font-bold text-black truncate">{user.name}</span>
+            <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter">System Administrator</span>
           </div>
         </div>
         <Link to="/admin/profile" className="block w-full">
@@ -103,17 +89,6 @@ const AdminLayout: React.FC = () => {
             Profile Settings
           </button>
         </Link>
-      </div>
-
-      {/* User Footer */}
-      <div className="p-4 border-t border-gray-100">
-        <button 
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-black hover:bg-gray-50 rounded-xl transition-all group"
-        >
-          <LogOut size={16} className="text-black opacity-30 group-hover:opacity-100 transition-opacity" />
-          Log Out
-        </button>
       </div>
     </aside>
   );
@@ -170,10 +145,6 @@ const AdminLayout: React.FC = () => {
                   placeholder="Search properties, agents, tenants..."
                   className="w-full h-9 bg-gray-50/50 border border-gray-200 focus:bg-white focus:border-indigo-500/20 rounded-lg pl-10 pr-10 text-[13px] focus:outline-none transition-all placeholder:text-black/70"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-20">
-                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[9px] font-bold">⌘</kbd>
-                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[9px] font-bold">/</kbd>
-                </div>
               </div>
             </div>
           </div>
@@ -197,15 +168,11 @@ const AdminLayout: React.FC = () => {
 
             <div className="flex items-center gap-3 pl-1">
               <div className="flex flex-col items-end hidden sm:flex">
-                <span className="text-[13px] font-bold text-black leading-none">{user?.name || 'Admin'}</span>
+                <span className="text-[13px] font-bold text-black leading-none">{user.name}</span>
                 <span className="text-[10px] font-bold text-black opacity-40 uppercase tracking-tighter mt-1">Administrator</span>
               </div>
               <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-black font-bold text-[13px] shrink-0 overflow-hidden">
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span>{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
-                )}
+                <span>{user.name.charAt(0)}</span>
               </div>
             </div>
           </div>

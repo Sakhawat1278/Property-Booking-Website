@@ -1,119 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Building2, Users, Loader2, UserCheck, CreditCard, ChevronRight,
-  Target, Calendar, TrendingUp, ArrowRight
+  Building2, Users, UserCheck, CreditCard, ChevronRight,
+  Target, ArrowRight
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { Link } from 'react-router-dom';
 
 const AdminOverview: React.FC = () => {
-  const [stats, setStats] = useState({
-    total: 0,
-    inquiries: 0,
-    agents: 0,
-    revenue: 0
-  });
-  const [recentProperties, setRecentProperties] = useState<any[]>([]);
-  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDashboardData();
-
-    const channel = supabase
-      .channel('admin-dashboard-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => fetchDashboardData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchDashboardData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchDashboardData())
-      .subscribe();
-
-    // Safety timeout: If data fetching takes more than 5 seconds, force stop the loading spinner
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 5000);
-
-    return () => { 
-      supabase.removeChannel(channel);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      if (!loading) setLoading(true);
-      console.log('--- Dashboard Fetch Cycle Started ---');
-      
-      // 1. Fetch Real Counts
-      console.log('Fetching Counts...');
-      const { count: propsCount, error: propsErr } = await supabase.from('properties').select('*', { count: 'exact', head: true });
-      if (propsErr) console.error('!! Props count error:', propsErr);
-
-      const { count: inquiriesCount, error: inqErr } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('type', 'VIEWING');
-      if (inqErr) console.error('!! Inquiries count error:', inqErr);
-
-      const { count: agentsCount, error: agentErr } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'AGENCY');
-      if (agentErr) console.error('!! Agents count error:', agentErr);
-      
-      setStats(prev => ({
-        ...prev,
-        total: propsCount || 0, 
-        inquiries: inquiriesCount || 0,
-        agents: agentsCount || 0
-      }));
-
-      // 2. Fetch Total Revenue
-      console.log('Fetching Revenue...');
-      const { data: revenueData, error: revErr } = await supabase
-        .from('bookings')
-        .select('total_amount')
-        .eq('status', 'CONFIRMED');
-      
-      if (revErr) console.error('!! Revenue fetch error:', revErr);
-      const totalRevenue = revenueData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0;
-
-      setStats(prev => ({ ...prev, revenue: totalRevenue }));
-
-      // 3. Fetch Recent Properties
-      console.log('Fetching Recent Properties...');
-      const { data: recent, error: recentPropsErr } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (recentPropsErr) console.error('!! Recent props error:', recentPropsErr);
-      setRecentProperties(recent || []);
-
-      // 4. Fetch Recent Inquiries
-      console.log('Fetching Recent Inquiries...');
-      const { data: inquiries, error: recentInqErr } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          properties (title)
-        `)
-        .eq('type', 'VIEWING')
-        .order('created_at', { ascending: false })
-        .limit(4);
-      
-      if (recentInqErr) console.error('!! Recent inquiries error:', recentInqErr);
-      setRecentInquiries(inquiries || []);
-      
-      console.log('--- Dashboard Fetch Cycle Completed ---');
-    } catch (err: any) {
-      console.error('!!! Dashboard Fatal Error:', err);
-    } finally {
-      setLoading(false);
-    }
+  // Mock Stats for Design Continuity
+  const stats = {
+    total: 124,
+    inquiries: 48,
+    agents: 12,
+    revenue: 142000
   };
+
+  const recentProperties = [
+    { id: '1', title: 'Luxury Villa in Malibu', city: 'California', price: 4500000, status: 'FOR_SALE', ownerName: 'Skyline Realty' },
+    { id: '2', title: 'Modern Penthouse', city: 'Dubai', price: 2800000, status: 'FOR_RENT', ownerName: 'Elite Estates' },
+    { id: '3', title: 'Alpine Chalet', city: 'Swiss Alps', price: 1200000, status: 'FOR_SALE', ownerName: 'Peak Properties' },
+  ];
+
+  const recentInquiries = [
+    { id: '1', guest_name: 'John Doe', guest_email: 'john@example.com', created_at: new Date().toISOString(), properties: { title: 'Luxury Villa in Malibu' } },
+    { id: '2', guest_name: 'Jane Smith', guest_email: 'jane@example.com', created_at: new Date().toISOString(), properties: { title: 'Modern Penthouse' } },
+  ];
 
   const kpis = [
     { 
       label: 'Total Properties', 
       value: stats.total.toLocaleString(), 
       icon: <Building2 size={16} />, 
-      change: 'Live Database Count',
+      change: 'Active Listings',
     },
     { 
       label: 'New Leads', 
@@ -131,17 +49,9 @@ const AdminOverview: React.FC = () => {
       label: 'Gross Revenue', 
       value: `$${stats.revenue.toLocaleString()}`, 
       icon: <CreditCard size={16} />, 
-      change: 'Confirmed Bookings',
+      change: 'Monthly Projections',
     },
   ];
-
-  if (loading && recentProperties.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin text-black" size={32} />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 font-poppins text-black animate-in fade-in duration-500">
@@ -190,7 +100,7 @@ const AdminOverview: React.FC = () => {
                       <span className="text-[13px] font-bold text-black">${p.price?.toLocaleString()}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[12px] text-black font-bold">{p.ownerName || 'Nestory'}</span>
+                      <span className="text-[12px] text-black font-bold">{p.ownerName}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border ${
@@ -231,12 +141,6 @@ const AdminOverview: React.FC = () => {
                 </Link>
               </div>
             ))}
-            {recentInquiries.length === 0 && (
-              <div className="py-10 text-center text-black/20">
-                <Target size={24} className="mx-auto mb-2 opacity-10" />
-                <p className="text-[12px] font-bold">No active inquiries</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

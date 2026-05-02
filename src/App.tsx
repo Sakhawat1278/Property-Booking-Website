@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Login from './pages/Login';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -22,18 +21,13 @@ import AgencyBookings from './pages/agency/AgencyBookings';
 import AgencyAnalytics from './pages/agency/AgencyAnalytics';
 import AgencySettings from './pages/agency/AgencySettings';
 import ProfileSettings from './pages/shared/ProfileSettings';
-import AdminRegister from './pages/admin/AdminRegister';
-import WaitingApproval from './pages/WaitingApproval';
-import AdminRoute from './components/AdminRoute';
-import AgencyRoute from './components/AgencyRoute';
 
-import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'sonner';
 import GlobalModal from './components/ui/GlobalModal';
 
 function App() {
   return (
-    <AuthProvider>
+    <>
       <Toaster 
         position="bottom-right" 
         toastOptions={{
@@ -47,21 +41,11 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/:slug" element={<PropertyDetails />} />
-          <Route path="/waiting-approval" element={<WaitingApproval />} />
-          <Route path="/admin-register-root-init" element={<AdminRegister />} />
 
-          {/* Admin Panel */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
+          {/* Admin Panel - Unrestricted */}
+          <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOverview />} />
             <Route path="properties" element={<AdminProperties />} />
             <Route path="properties/new" element={<AdminPropertyEditor />} />
@@ -76,15 +60,8 @@ function App() {
             <Route path="profile" element={<ProfileSettings />} />
           </Route>
 
-          {/* Agency Dashboard */}
-          <Route
-            path="/agency"
-            element={
-              <AgencyRoute>
-                <AgencyLayout />
-              </AgencyRoute>
-            }
-          >
+          {/* Agency Dashboard - Unrestricted */}
+          <Route path="/agency" element={<AgencyLayout />}>
             <Route index element={<AgencyOverview />} />
             <Route path="properties" element={<AgencyProperties />} />
             <Route path="properties/new" element={<AdminPropertyEditor />} />
@@ -97,7 +74,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </AuthProvider>
+    </>
   );
 }
 

@@ -8,7 +8,7 @@ import {
   Wifi, Zap, Thermometer, ShieldCheck, CheckCircle2,
   Clock, Info, Key, CreditCard, Droplets
 } from 'lucide-react';
-import { supabase, uploadImage } from '../../lib/supabase';
+
 import type { Property } from '../../data/properties';
 import { toast } from 'sonner';
 import CustomDropdown from '../../components/ui/CustomDropdown';

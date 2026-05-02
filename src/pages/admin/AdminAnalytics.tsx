@@ -4,7 +4,7 @@ import {
   TrendingUp, Users, Building2, MousePointer2, 
   Globe, BarChart3, PieChart, Activity, Loader2
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 
 const AdminAnalytics: React.FC = () => {
   const [data, setData] = useState({
@@ -23,9 +23,9 @@ const AdminAnalytics: React.FC = () => {
     try {
       setLoading(true);
       
-      const { count: uCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-      const { count: pCount } = await supabase.from('properties').select('*', { count: 'exact', head: true }).eq('status', 'FOR_SALE');
-      const { data: bData } = await supabase.from('bookings').select('total_amount, type');
+      const { count: uCount } = await 
+      const { count: pCount } = await 
+      const { data: bData } = await 
       
       const revenue = bData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0;
       const viewings = bData?.filter(b => b.type === 'VIEWING').length || 0;

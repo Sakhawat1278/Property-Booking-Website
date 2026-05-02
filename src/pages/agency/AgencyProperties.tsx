@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, Plus, MapPin, Star, Edit3, Trash2, Loader2, Building2
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -46,7 +46,7 @@ const AgencyProperties: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this listing?')) return;
     try {
-      const { error } = await supabase.from('properties').delete().eq('id', id);
+      const { error } = await 
       if (error) throw error;
       setProperties(prev => prev.filter(p => p.id !== id));
       toast.success('Property removed successfully');

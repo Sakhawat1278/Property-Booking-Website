@@ -3,7 +3,7 @@ import {
   Globe, Shield, Mail, CreditCard, ChevronRight, Save, 
   Loader2, CheckCircle2, AlertCircle, RefreshCcw
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 import { toast } from 'sonner';
 
 import { useAuth } from '../../context/AuthContext';
@@ -26,7 +26,7 @@ const AdminSettings: React.FC = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('system_settings').select('*');
+      const { data, error } = await 
       if (error) throw error;
 
       const mergedSettings = { ...settings };
@@ -66,7 +66,7 @@ const AdminSettings: React.FC = () => {
     try {
       setSaving(true);
       const promises = Object.keys(settings).map(key => 
-        supabase.from('system_settings').upsert({ key, value: settings[key], updated_at: new Date().toISOString() })
+        
       );
       await Promise.all(promises);
       toast.success('All system settings synchronized');

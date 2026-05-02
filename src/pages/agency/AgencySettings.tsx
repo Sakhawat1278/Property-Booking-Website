@@ -4,7 +4,7 @@ import {
   Save, Loader2, Camera, ExternalLink, Briefcase, Award
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
+
 import { toast } from 'sonner';
 
 const AgencySettings: React.FC = () => {

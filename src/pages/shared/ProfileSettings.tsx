@@ -6,7 +6,7 @@ import {
   Users, BarChart3, TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
+
 import { toast } from 'sonner';
 
 const ProfileSettings: React.FC = () => {
@@ -56,8 +56,8 @@ const ProfileSettings: React.FC = () => {
       setFetchingStats(true);
       if (user?.role === 'ADMIN') {
         // Admin stats: Total Users & Total Properties
-        const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: propertiesCount } = await supabase.from('properties').select('*', { count: 'exact', head: true });
+        const { count: usersCount } = await 
+        const { count: propertiesCount } = await 
         
         setStats({
           primary: { value: usersCount?.toString() || '0', label: 'Platform Users' },
@@ -127,13 +127,13 @@ const ProfileSettings: React.FC = () => {
       const fileExt = file.name.split('.').pop();
       const filePath = `${user?.id}/${type}-${Math.random()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await 
         .from(type === 'avatar' ? 'avatars' : 'covers')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = 
         .from(type === 'avatar' ? 'avatars' : 'covers')
         .getPublicUrl(filePath);
 
@@ -165,7 +165,7 @@ const ProfileSettings: React.FC = () => {
 
     try {
       setSaving(true);
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await 
         password: passwordData.newPassword
       });
 

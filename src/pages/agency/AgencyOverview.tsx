@@ -4,7 +4,7 @@ import {
   Building2, Users, Target, Calendar, TrendingUp, ChevronRight, 
   Loader2, MessageSquare, Clock, CheckCircle2, User
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -30,9 +30,9 @@ const AgencyOverview: React.FC = () => {
       setLoading(true);
       
       // Fetch stats for this specific agency
-      const { data: props } = await supabase.from('properties').select('id').eq('owner_id', user?.id);
-      const { data: leads } = await supabase.from('bookings').select('*, properties!inner(*)').eq('properties.owner_id', user?.id).eq('type', 'VIEWING');
-      const { data: bookings } = await supabase.from('bookings').select('*, properties!inner(*)').eq('properties.owner_id', user?.id).eq('type', 'BOOKING').eq('status', 'CONFIRMED');
+      const { data: props } = await 
+      const { data: leads } = await 
+      const { data: bookings } = await 
 
       setStats({
         myProperties: props?.length || 0,

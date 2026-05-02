@@ -12,7 +12,7 @@ import PropertyCard from '../components/PropertyCard';
 const IconChevronDown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
 
 import { properties as localProperties } from '../data/properties';
-import { supabase } from '../lib/supabase';
+
 
 const Properties = () => {
   const [searchParams] = useSearchParams();
@@ -52,7 +52,7 @@ const Properties = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      
     };
   }, []);
 

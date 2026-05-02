@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, Calendar, User, Building2, Loader2, X, CheckCircle2, AlertCircle
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,7 +41,7 @@ const AgencyBookings: React.FC = () => {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const { error } = await supabase.from('bookings').update({ status }).eq('id', id);
+      const { error } = await 
       if (error) throw error;
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
       setSelectedBooking(prev => prev ? { ...prev, status } : null);

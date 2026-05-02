@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, User, Mail, Phone, Clock, Target, Loader2, MoreHorizontal
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 

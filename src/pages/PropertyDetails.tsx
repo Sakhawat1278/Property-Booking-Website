@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { supabase } from '../lib/supabase';
+
 import CustomDropdown from '../components/ui/CustomDropdown';
 import CustomDatePicker from '../components/ui/CustomDatePicker';
 import { useAuth } from '../context/AuthContext';

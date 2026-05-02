@@ -10,7 +10,6 @@ import CustomDatePicker from '../components/ui/CustomDatePicker';
 import PropertyCard from '../components/PropertyCard';
 import LocationAutocomplete from '../components/ui/LocationAutocomplete';
 import { properties as localProperties } from '../data/properties';
-import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -19,42 +18,12 @@ const Home = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [location, setLocation] = useState('');
   
-  const [properties, setProperties] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [properties, setProperties] = useState<any[]>(localProperties);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchProperties();
-
-    // Realtime listener for live featured properties
-    const channel = supabase
-      .channel('home-featured-props')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
-        fetchProperties();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Analytics or local logic here if needed
   }, []);
-
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (error) throw error;
-      setProperties(data || []);
-    } catch (err: any) {
-      console.error('Error fetching properties:', err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const featuredProperties = properties;
 
@@ -81,12 +50,9 @@ const Home = () => {
     <div className="min-h-screen bg-white font-poppins selection:bg-brand selection:text-white">
       <Navbar />
       
-      {/* Main Hero Container - Uniform 8px Frame */}
       <main className="pt-[72px] md:pt-[88px] px-2 pb-2 flex flex-col gap-2">
-        {/* Wrapper to prevent clipping while keeping section overflow hidden */}
         <div className="relative">
           <section className="relative h-[calc(100dvh-80px)] md:h-[calc(100dvh-96px)] min-h-[650px] md:min-h-[700px] w-full rounded-[16px] md:rounded-[24px] overflow-hidden flex items-center px-5 md:px-8">
-            {/* Background Image */}
             <div className="absolute inset-0 z-0 bg-[#1A1A1A]">
               <img 
                 src="/hero-bg-modern.jpg" 
@@ -96,7 +62,6 @@ const Home = () => {
               <div className="absolute inset-0 bg-black/40" />
             </div>
 
-              {/* Hero Content */}
               <div className="relative z-10 max-w-4xl pb-[300px] sm:pb-[260px] md:pb-28">
                 <motion.h1 
                   initial={{ opacity: 0, x: -30 }}
@@ -133,7 +98,6 @@ const Home = () => {
                       <ArrowUpRight size={16} strokeWidth={2} />
                     </div>
                     
-                    {/* Subtle Shine Effect */}
                     <motion.div
                       variants={{
                         hover: { x: '100%' }
@@ -147,7 +111,6 @@ const Home = () => {
               </div>
           </section>
 
-          {/* Floating Interactive Search Bar - Outside overflow-hidden section */}
             <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -155,7 +118,6 @@ const Home = () => {
             className="absolute bottom-[12px] md:bottom-[20px] left-1/2 -translate-x-1/2 w-full max-w-6xl z-20 px-3 md:px-8"
           >
             <div className="bg-white p-3 md:p-2 md:pr-6 rounded-2xl md:rounded-full border border-gray-100 flex flex-col md:flex-row items-stretch md:items-center gap-0 md:gap-2">
-              {/* Location Search */}
               <div className="flex-1 w-full px-4 md:px-6 py-3 flex items-center gap-3 border-b md:border-b-0 md:border-r border-gray-100">
                 <div className="p-2 bg-brand/10 rounded-full text-brand">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -169,7 +131,6 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Property Type */}
               <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <CustomDropdown 
                   label="Type"
@@ -180,7 +141,6 @@ const Home = () => {
                 />
               </div>
 
-              {/* Budget Range */}
               <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <PriceRangeSlider 
                   label="Budget"
@@ -191,7 +151,6 @@ const Home = () => {
                 />
               </div>
 
-              {/* Date Picker */}
               <div className="flex-1 border-b md:border-b-0 md:border-r border-gray-100">
                 <CustomDatePicker 
                   label="Available From"
@@ -200,7 +159,6 @@ const Home = () => {
                 />
               </div>
 
-              {/* Search Button */}
               <div className="pt-3 pb-1 md:pt-0 md:pb-0 flex justify-center md:block">
                 <motion.button 
                   onClick={handleSearch}
@@ -226,7 +184,6 @@ const Home = () => {
       
       <div className="h-12" />
 
-      {/* Services Section */}
       <section className="w-full px-8 py-6 overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div
@@ -315,7 +272,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Explore Luxury Locations Section */}
       <section className="w-full px-8 py-12 bg-[#E8EDF2] overflow-hidden">
         <div className="w-full">
           <div className="flex flex-col items-center text-center mb-6">
@@ -325,7 +281,6 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Location 1: Manhattan */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -355,7 +310,6 @@ const Home = () => {
               </div>
             </motion.div>
 
-            {/* Location 2: Malibu */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -386,7 +340,6 @@ const Home = () => {
               </div>
             </motion.div>
 
-            {/* Location 3: Bali */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -417,7 +370,6 @@ const Home = () => {
               </div>
             </motion.div>
 
-            {/* Location 4: Dubai */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -450,7 +402,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-      {/* The Investor's Voice Section */}
+      
       <section className="w-full px-8 py-12 bg-[#F8FAFC] overflow-hidden">
         <div className="w-full">
           <div className="flex flex-col items-center text-center mb-10">
@@ -473,7 +425,6 @@ const Home = () => {
             >
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-6">
-                  {/* Testimonial Card 1 */}
                   <div className="w-[400px] bg-white rounded-[48px] p-10 flex flex-col justify-between border border-gray-50 flex-shrink-0">
                     <div>
                       <div className="w-12 h-12 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-[#94A3B8] mb-8">
@@ -494,7 +445,6 @@ const Home = () => {
                     </div>
                   </div>
 
-                  {/* Testimonial Card 2 */}
                   <div className="w-[400px] bg-white rounded-[48px] p-10 flex flex-col justify-between border border-gray-50 flex-shrink-0">
                     <div>
                       <div className="w-12 h-12 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-[#94A3B8] mb-8">
@@ -514,69 +464,6 @@ const Home = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Testimonial Card 3 */}
-                  <div className="w-[400px] bg-white rounded-[48px] p-10 flex flex-col justify-between border border-gray-50 flex-shrink-0">
-                    <div>
-                      <div className="w-12 h-12 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-[#94A3B8] mb-8">
-                        <Quote size={20} fill="currentColor" />
-                      </div>
-                      <p className="text-[15px] text-gray-500 leading-relaxed mb-10 whitespace-normal">
-                        A very smooth and professional experience. The interface is intuitive and the property selection is <span className="text-brand font-bold">curated</span> for excellence.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-gray-100">
-                        <img src="/avatars/avatar3.png" className="w-full h-full object-cover" alt="Elena Rossi" />
-                      </div>
-                      <div>
-                        <h4 className="text-[15px] font-semibold text-[#1A1A1A]">Elena Rossi</h4>
-                        <p className="text-gray-400 text-[11px]">lifestyle_elite_77</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Testimonial Card 4 */}
-                  <div className="w-[400px] bg-white rounded-[48px] p-10 flex flex-col justify-between border border-gray-50 flex-shrink-0">
-                    <div>
-                      <div className="w-12 h-12 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-[#94A3B8] mb-8">
-                        <Quote size={20} fill="currentColor" />
-                      </div>
-                      <p className="text-[15px] text-gray-500 leading-relaxed mb-10 whitespace-normal">
-                        The legal support and verification process is what made me choose Nestory. It's <span className="text-brand font-bold">secure</span> and highly transparent.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-gray-100">
-                        <div className="w-full h-full bg-gradient-to-br from-brand/20 to-brand-dark/20 flex items-center justify-center text-brand font-black text-[14px]">AK</div>
-                      </div>
-                      <div>
-                        <h4 className="text-[15px] font-semibold text-[#1A1A1A]">Ahmad Khan</h4>
-                        <p className="text-gray-400 text-[11px]">global_investor_44</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Testimonial Card 5 */}
-                  <div className="w-[400px] bg-white rounded-[48px] p-10 flex flex-col justify-between border border-gray-100 flex-shrink-0">
-                    <div>
-                      <div className="w-12 h-12 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-[#94A3B8] mb-8">
-                        <Quote size={20} fill="currentColor" />
-                      </div>
-                      <p className="text-[15px] text-gray-500 leading-relaxed mb-10 whitespace-normal">
-                        I've found my dream home in Malibu within weeks. The matching algorithm is <span className="text-brand font-bold">fantastic</span> for busy professionals.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-gray-100">
-                        <div className="w-full h-full bg-gradient-to-br from-brand/20 to-brand-dark/20 flex items-center justify-center text-brand font-black text-[14px]">NJ</div>
-                      </div>
-                      <div>
-                        <h4 className="text-[15px] font-semibold text-[#1A1A1A]">Noel Jensen</h4>
-                        <p className="text-gray-400 text-[11px]">modern_living_22</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               ))}
             </motion.div>
@@ -584,7 +471,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Ultra Minimal CTA Section */}
       <section className="w-full px-8 py-16 bg-white overflow-hidden">
         <div className="w-full">
           <motion.div 
@@ -593,7 +479,6 @@ const Home = () => {
             viewport={{ once: true }}
             className="relative bg-black rounded-[32px] overflow-hidden"
           >
-            {/* Top Vignette Gradient */}
             <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none"></div>
 
@@ -614,7 +499,6 @@ const Home = () => {
                   <ArrowUpRight size={20} strokeWidth={2} />
                 </div>
                 
-                {/* Subtle Shine Effect */}
                 <motion.div
                   variants={{
                     shineHover: { x: '100%' }
@@ -629,7 +513,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Massive Brand Footer */}
       <Footer />
     </div>
   );
